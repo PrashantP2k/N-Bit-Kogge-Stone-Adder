@@ -7,3 +7,6 @@ This project contains the Verilog implementation of N-Bit Kogge-Stone adder. In 
 Note: N should be a power of 2.
 
 The results have been compiled with N = 64.
+
+Simulation was done using Icarus Verilog version 12.0 (devel) (s20150603-1539-g2693dd32b).
+RTL - GDSII flow was done with the help of Zero ASIC's Silicon Compiler using the skywater130 PDK.
