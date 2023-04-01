@@ -4,6 +4,8 @@ Kogge-Stone adder is considered to be the fastest state-of-the-art adder structu
 
 This project contains the Verilog implementation of N-Bit Kogge-Stone adder. In order to understand the code of the N-bit adder module, it is advised to first go through the codes of 8-bit, 16-bit and 32-bit modules of the Kogge-Stone adder (make sure to use testbench modules accordingly).
 
+Simulation can be done on [edaplayground.com](https://www.edaplayground.com/x/M488)
+
 Note: N should be a power of 2.
 
 The results have been compiled with N = 64.
