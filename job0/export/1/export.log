@@ -1,0 +1,186 @@
+OpenROAD v2.0-7072-g6de104daf 
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+Reading liberty file for fast: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ff_100C_1v95.lib.gz
+Reading liberty file for slow: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ss_n40C_1v40.lib.gz
+Reading liberty file for typical: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__tt_025C_1v80.lib.gz
+Reading ODB: inputs/KoggeStoneAdder.odb
+Reading SDC: inputs/KoggeStoneAdder.sdc
+[WARNING FLW-0001] No clocks defined.
+[INFO ORD-0030] Using 2 thread(s).
+# Write LEF
+write_abstract_lef "outputs/${sc_design}.lef"
+if { [lindex [dict get $sc_cfg tool $sc_tool task $sc_task {var} write_cdl] 0] == "true" } {
+  # Write CDL
+  set sc_cdl_masters []
+  foreach lib "$sc_targetlibs $sc_macrolibs" {
+    #CDL files
+    if {[dict exists $sc_cfg library $lib output $sc_stackup cdl]} {
+      foreach cdl_file [dict get $sc_cfg library $lib output $sc_stackup cdl] {
+        lappend sc_cdl_masters $cdl_file
+      }
+    }
+  }
+  write_cdl -masters $sc_cdl_masters "outputs/${sc_design}.cdl"
+}
+# generate SPEF
+# just need to define a corner
+define_process_corner -ext_model_index 0 X
+[INFO RCX-0431] Defined process_corner X with ext_model_index 0
+[INFO RCX-0029] Defined extraction corner X
+foreach pexcorner $sc_pex_corners {
+  set sc_pextool "${sc_tool}-openrcx"
+  set pex_model [lindex [dict get $sc_cfg pdk $sc_pdk pexmodel $sc_pextool $sc_stackup $pexcorner] 0]
+  extract_parasitics -ext_model_file $pex_model
+  write_spef "outputs/${sc_design}.${pexcorner}.spef"
+}
+[INFO RCX-0008] extracting parasitics of KoggeStoneAdder ...
+[INFO RCX-0435] Reading extraction model file /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/pex/openroad/typical.rules ...
+[INFO RCX-0436] RC segment generation KoggeStoneAdder (max_merge_res 50.0) ...
+[INFO RCX-0040] Final 1801 rc segments
+[INFO RCX-0439] Coupling Cap extraction KoggeStoneAdder ...
+[INFO RCX-0440] Coupling threshhold is 0.1000 fF, coupling capacitance less than 0.1000 fF will be grounded.
+[INFO RCX-0043] 3927 wires to be extracted
+[INFO RCX-0442] 59% completion -- 2326 wires have been extracted
+[INFO RCX-0442] 100% completion -- 3927 wires have been extracted
+[INFO RCX-0045] Extract 589 nets, 2390 rsegs, 2390 caps, 2350 ccs
+[INFO RCX-0015] Finished extracting KoggeStoneAdder.
+[INFO RCX-0016] Writing SPEF ...
+[INFO RCX-0443] 589 nets finished
+[INFO RCX-0017] Finished writing SPEF ...
+[INFO RCX-0008] extracting parasitics of KoggeStoneAdder ...
+[INFO RCX-0435] Reading extraction model file /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/pex/openroad/maximum.rules ...
+[INFO RCX-0436] RC segment generation KoggeStoneAdder (max_merge_res 50.0) ...
+[INFO RCX-0040] Final 1817 rc segments
+[INFO RCX-0439] Coupling Cap extraction KoggeStoneAdder ...
+[INFO RCX-0440] Coupling threshhold is 0.1000 fF, coupling capacitance less than 0.1000 fF will be grounded.
+[INFO RCX-0043] 3927 wires to be extracted
+[INFO RCX-0045] Extract 589 nets, 2406 rsegs, 2406 caps, 2363 ccs
+[INFO RCX-0015] Finished extracting KoggeStoneAdder.
+[INFO RCX-0016] Writing SPEF ...
+[INFO RCX-0443] 589 nets finished
+[INFO RCX-0017] Finished writing SPEF ...
+[INFO RCX-0008] extracting parasitics of KoggeStoneAdder ...
+[INFO RCX-0435] Reading extraction model file /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/pex/openroad/minimum.rules ...
+[INFO RCX-0436] RC segment generation KoggeStoneAdder (max_merge_res 50.0) ...
+[INFO RCX-0040] Final 1766 rc segments
+[INFO RCX-0439] Coupling Cap extraction KoggeStoneAdder ...
+[INFO RCX-0440] Coupling threshhold is 0.1000 fF, coupling capacitance less than 0.1000 fF will be grounded.
+[INFO RCX-0043] 3927 wires to be extracted
+[INFO RCX-0045] Extract 589 nets, 2355 rsegs, 2355 caps, 2324 ccs
+[INFO RCX-0015] Finished extracting KoggeStoneAdder.
+[INFO RCX-0016] Writing SPEF ...
+[INFO RCX-0443] 589 nets finished
+[INFO RCX-0017] Finished writing SPEF ...
+set lib_pex [dict create]
+foreach scenario $sc_scenarios {
+  set libcorner [dict get $sc_cfg constraint timing $scenario libcorner]
+  set pexcorner [dict get $sc_cfg constraint timing $scenario pexcorner]
+  dict set lib_pex $libcorner $pexcorner
+}
+# read in spef for timing corners
+foreach corner $sc_corners {
+  set pexcorner [dict get $lib_pex $corner]
+  read_spef -corner $corner \
+    "outputs/${sc_design}.${pexcorner}.spef"
+}
+# Write timing models
+foreach corner $sc_corners {
+  write_timing_model -library_name "${sc_design}_${corner}" \
+    -corner $corner \
+    "outputs/${sc_design}.${corner}.lib"
+}
+SC_METRIC: report_checks -path_delay max
+No paths found.
+SC_METRIC: report_checks -path_delay min
+No paths found.
+SC_METRIC: unconstrained
+Startpoint: B[0] (input port)
+Endpoint: S[63] (output port)
+Path Group: (none)
+Path Type: max
+Corner: slow
+
+    Cap   Delay    Time   Description
+----------------------------------------------------------------
+           0.00    0.00 ^ input external delay
+   0.01    0.47    0.47 ^ B[0] (in)
+   0.01    0.43    0.90 v _500_/Y (sky130_fd_sc_hd__nor2_1)
+   0.03    1.06    1.96 ^ _502_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.66    2.62 v _505_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.01    1.15    3.76 ^ _508_/Y (sky130_fd_sc_hd__o311ai_4)
+   0.02    0.63    4.39 v _512_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.02    1.13    5.53 v _521_/X (sky130_fd_sc_hd__o21ba_2)
+   0.03    1.22    6.75 v _522_/X (sky130_fd_sc_hd__o221a_4)
+   0.03    1.25    8.00 ^ _527_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.03    0.65    8.65 v _543_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.03    1.22    9.87 ^ _559_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.75   10.62 v _565_/Y (sky130_fd_sc_hd__a311oi_2)
+   0.01    0.97   11.59 ^ _570_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.54   12.13 v _574_/Y (sky130_fd_sc_hd__o211ai_2)
+   0.01    0.72   12.85 ^ _731_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.43   13.28 v _739_/Y (sky130_fd_sc_hd__o21ai_1)
+   0.01    1.35   14.64 ^ _745_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.02    0.71   15.34 v _749_/Y (sky130_fd_sc_hd__o22ai_4)
+   0.03    1.29   16.63 ^ _755_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.73   17.36 v _760_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.02    1.21   18.57 ^ _765_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.60   19.17 v _773_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.19   20.35 ^ _779_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.59   20.94 v _785_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.42   22.36 ^ _793_/Y (sky130_fd_sc_hd__o31ai_4)
+   0.02    0.70   23.06 v _799_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.04    1.46   24.53 ^ _807_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.82   25.35 v _841_/Y (sky130_fd_sc_hd__a41oi_2)
+   0.03    1.17   26.52 ^ _846_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.00    0.83   27.36 ^ _847_/X (sky130_fd_sc_hd__xor2_4)
+           0.00   27.36 ^ S[63] (out)
+                  27.36   data arrival time
+----------------------------------------------------------------
+(Path is unconstrained)
+
+
+SC_METRIC: DRV violators
+SC_METRIC: floating nets
+SC_METRIC: tns
+tns 0.00
+SC_METRIC: setupslack
+worst slack INF
+SC_METRIC: holdslack
+worst slack INF
+SC_METRIC: power
+Power for corner: fast
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.96e-12   1.83e-12   4.37e-06   4.37e-06 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.96e-12   1.83e-12   4.37e-06   4.37e-06 100.0%
+                           0.0%       0.0%     100.0%
+Power for corner: slow
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          8.38e-13   8.33e-13   1.07e-09   1.07e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  8.38e-13   8.33e-13   1.07e-09   1.07e-09 100.0%
+                           0.1%       0.1%      99.8%
+Power for corner: typical
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.52e-12   1.52e-12   1.65e-09   1.65e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.52e-12   1.52e-12   1.65e-09   1.65e-09 100.0%
+                           0.1%       0.1%      99.8%
+SC_METRIC: cellarea
+Design area 5600 u^2 20% utilization.

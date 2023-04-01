@@ -1,0 +1,1333 @@
+sccompute_init
+find: 'build': No such file or directory
+
+ ____  _ _ _                    ____                      _ _
+/ ___|(_) (_) ___ ___  _ __    / ___|___  _ __ ___  _ __ (_) | ___ _ __
+\___ \| | | |/ __/ _ \| '_ \  | |   / _ \| '_ ` _ \| '_ \| | |/ _ \ '__|
+ ___) | | | | (_| (_) | | | | | |__| (_) | | | | | | |_) | | |  __/ |
+|____/|_|_|_|\___\___/|_| |_|  \____\___/|_| |_| |_| .__/|_|_|\___|_|
+                                                   |_|
+
+Authors: Andreas Olofsson, William Ransohoff, Noah Moroze, Zachary Yedidia, Massimiliano Giacometti, Kimia Talaei, Peter Gadfort, Aulihan Teng
+Version: 0.10.1 
+
+--------------------------------------------------------------------------------
+| INFO    | Command line argument entered: ['option', 'cfg'] Value: build/KoggeStoneAdder/job0/configs/route0.json
+| INFO    | Command line argument entered: ['option', 'builddir'] Value: build
+| INFO    | Command line argument entered: ['arg', 'step'] Value: route
+| INFO    | Command line argument entered: ['arg', 'index'] Value: 0
+| INFO    | Command line argument entered: ['design'] Value: KoggeStoneAdder
+| INFO    | job0  | --         | -  | Checking manifest before running.
+| INFO    | job0  | route      | 0  | Tool 'openroad' found with version 'v2.0-7072' in directory '/usr/local/bin'
+| INFO    | job0  | route      | 0  | Running in build/KoggeStoneAdder/job0/route/0
+| INFO    | job0  | route      | 0  | openroad -exit -metrics reports/metrics.json /home/ubuntu/siliconcompiler/siliconcompiler/tools/openroad/sc_apr.tcl
+OpenROAD v2.0-7072-g6de104daf 
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+Reading liberty file for fast: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ff_100C_1v95.lib.gz
+Reading liberty file for slow: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ss_n40C_1v40.lib.gz
+Reading liberty file for typical: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__tt_025C_1v80.lib.gz
+Reading ODB: inputs/KoggeStoneAdder.odb
+Reading SDC: inputs/KoggeStoneAdder.sdc
+[WARNING FLW-0001] No clocks defined.
+[INFO ORD-0030] Using 4 thread(s).
+##########################################################
+# ROUTING
+##########################################################
+#######################
+# Helper functions
+#######################
+proc insert_fillers {} {
+  upvar sc_filler sc_filler
+  if { ! ( $sc_filler eq "" ) } {
+    filler_placement $sc_filler
+  }
+  check_placement -verbose
+  global_connect
+}
+#######################
+# Add Fillers
+#######################
+insert_fillers
+[INFO DPL-0001] Placed 3126 filler instances.
+######################
+# Setup detailed route options
+######################
+if {[dict exists $sc_cfg tool $sc_tool task $sc_task var drt_default_via]} {
+  foreach via [dict exists $sc_cfg tool $sc_tool task $sc_task var drt_default_via] {
+    detailed_route_set_default_via $via
+  }
+}
+if {[dict exists $sc_cfg tool $sc_tool task $sc_task var drt_unidirectional_layer]} {
+  foreach layer [dict exists $sc_cfg tool $sc_tool task $sc_task var drt_unidirectional_layer] {
+    detailed_route_set_unidirectional_layer $via
+  }
+}
+######################
+# GLOBAL ROUTE
+######################
+# Pin access
+if {$openroad_grt_use_pin_access == "true"} {
+  openroad_pin_access_args []
+  if {$openroad_drt_process_node != "false"} {
+    lappend openroad_pin_access_args "-db_process_node" $openroad_drt_process_node
+  }
+  pin_access -bottom_routing_layer $sc_minmetal \
+    -top_routing_layer $sc_maxmetal \
+    {*}$openroad_pin_access_args
+}
+set sc_grt_arguments []
+if {$openroad_grt_allow_congestion == "true"} {
+  lappend sc_grt_arguments "-allow_congestion"
+}
+if {$openroad_grt_allow_overflow == "true"} {
+  lappend sc_grt_arguments "-allow_overflow"
+}
+global_route -guide_file "./route.guide" \
+  -congestion_iterations $openroad_grt_overflow_iter \
+  -congestion_report_file "reports/${sc_design}_congestion.rpt" \
+  -verbose \
+  {*}$sc_grt_arguments
+[INFO GRT-0020] Min routing layer: met1
+[INFO GRT-0021] Max routing layer: met5
+[INFO GRT-0022] Global adjustment: 0%
+[INFO GRT-0023] Grid origin: (0, 0)
+[INFO GRT-0043] No OR_DEFAULT vias defined.
+[INFO GRT-0088] Layer li1     Track-Pitch = 0.4600  line-2-Via Pitch: 0.3400
+[INFO GRT-0088] Layer met1    Track-Pitch = 0.3400  line-2-Via Pitch: 0.3400
+[INFO GRT-0088] Layer met2    Track-Pitch = 0.4600  line-2-Via Pitch: 0.3500
+[INFO GRT-0088] Layer met3    Track-Pitch = 0.6800  line-2-Via Pitch: 0.6150
+[INFO GRT-0088] Layer met4    Track-Pitch = 0.9200  line-2-Via Pitch: 1.0400
+[INFO GRT-0088] Layer met5    Track-Pitch = 3.4000  line-2-Via Pitch: 3.1100
+[INFO GRT-0019] Found 0 clock nets.
+[INFO GRT-0001] Minimum degree: 2
+[INFO GRT-0002] Maximum degree: 6
+[INFO GRT-0003] Macros: 0
+[INFO GRT-0004] Blockages: 505
+
+[INFO GRT-0053] Routing resources analysis:
+          Routing      Original      Derated      Resource
+Layer     Direction    Resources     Resources    Reduction (%)
+---------------------------------------------------------------
+li1        Vertical            0             0          0.00%
+met1       Horizontal      12500          6425          48.60%
+met2       Vertical         9375          6197          33.90%
+met3       Horizontal       6250          4312          31.01%
+met4       Vertical         3750          2052          45.28%
+met5       Horizontal       1250           628          49.76%
+---------------------------------------------------------------
+
+[INFO GRT-0197] Via related to pin nodes: 2265
+[INFO GRT-0198] Via related Steiner nodes: 32
+[INFO GRT-0199] Via filling finished.
+[INFO GRT-0111] Final number of vias: 2444
+[INFO GRT-0112] Final usage 3D: 9203
+
+[INFO GRT-0096] Final congestion report:
+Layer         Resource        Demand        Usage (%)    Max H / Max V / Total Overflow
+---------------------------------------------------------------------------------------
+li1                  0             0            0.00%             0 /  0 /  0
+met1              6425           924           14.38%             0 /  0 /  0
+met2              6197           928           14.97%             0 /  0 /  0
+met3              4312            11            0.26%             0 /  0 /  0
+met4              2052             8            0.39%             0 /  0 /  0
+met5               628             0            0.00%             0 /  0 /  0
+---------------------------------------------------------------------------------------
+Total            19614          1871            9.54%             0 /  0 /  0
+
+[INFO GRT-0018] Total wirelength: 27179 um
+[INFO GRT-0014] Routed nets: 589
+######################
+# Report and Repair Antennas
+######################
+estimate_parasitics -global_routing
+# Disabled until segfault on OpenROAD/src/odb/src/db/tmg_conn.cpp:1673 _last_id = x->_first_pt->_dbwire_id;
+# is resolved
+# if {[check_antennas -report_file "reports/${sc_design}_antenna.rpt"] != 0} {
+#   if {[llength [dict get $sc_cfg library $sc_mainlib asic cells antenna]] != 0} {
+#     set sc_antenna [lindex [dict get $sc_cfg library $sc_mainlib asic cells antenna] 0]
+#     # Remove filler cells before attempting to repair antennas
+#     remove_fillers
+#     repair_antenna $sc_antenna \
+#       -iterations $openroad_ant_iterations \
+#       -ratio_margin $openroad_ant_margin
+#     # Add filler cells back
+#     insert_fillers
+#     # Check antennas again to get final report
+#     check_antennas -report_file "reports/${sc_design}_antenna_post_repair.rpt"
+#   }
+# }
+######################
+# Detailed Route
+######################
+set openroad_drt_arguments []
+if {$openroad_drt_disable_via_gen == "true"} {
+  lappend openroad_drt_arguments "-disable_via_gen"
+}
+if {$openroad_drt_process_node != "false"} {
+  lappend openroad_drt_arguments "-db_process_node" $openroad_drt_process_node
+}
+if {$openroad_drt_process_node != "false"} {
+  lappend openroad_drt_arguments "-via_in_pin_bottom_layer" $openroad_drt_via_in_pin_bottom_layer
+}
+if {$openroad_drt_process_node != "false"} {
+  lappend openroad_drt_arguments "-via_in_pin_top_layer" $openroad_drt_via_in_pin_top_layer
+}
+if {$openroad_drt_process_node != "false"} {
+  lappend openroad_drt_arguments "-repair_pdn_vias" $openroad_drt_repair_pdn_vias
+}
+detailed_route -save_guide_updates \
+  -output_drc "reports/${sc_design}_drc.rpt" \
+  -output_maze "reports/${sc_design}_maze.log" \
+  -bottom_routing_layer $sc_minmetal \
+  -top_routing_layer $sc_maxmetal \
+  -verbose 1 \
+  {*}$openroad_drt_arguments
+[INFO DRT-0149] Reading tech and libs.
+
+Units:                1000
+Number of layers:     13
+Number of macros:     437
+Number of vias:       25
+Number of viarulegen: 25
+
+[INFO DRT-0150] Reading design.
+
+Design:                   KoggeStoneAdder
+Die area:                 ( 0 0 ) ( 178210 178210 )
+Number of track patterns: 12
+Number of DEF vias:       4
+Number of components:     3964
+Number of terminals:      195
+Number of snets:          2
+Number of nets:           589
+
+[INFO DRT-0167] List of default vias:
+  Layer mcon
+    default via: L1M1_PR
+  Layer via
+    default via: M1M2_PR
+  Layer via2
+    default via: M2M3_PR
+  Layer via3
+    default via: M3M4_PR
+  Layer via4
+    default via: M4M5_PR
+[INFO DRT-0162] Library cell analysis.
+[INFO DRT-0163] Instance analysis.
+[INFO DRT-0164] Number of unique instances = 141.
+[INFO DRT-0168] Init region query.
+[INFO DRT-0024]   Complete FR_MASTERSLICE.
+[INFO DRT-0024]   Complete Fr_VIA.
+[INFO DRT-0024]   Complete li1.
+[INFO DRT-0024]   Complete mcon.
+[INFO DRT-0024]   Complete met1.
+[INFO DRT-0024]   Complete via.
+[INFO DRT-0024]   Complete met2.
+[INFO DRT-0024]   Complete via2.
+[INFO DRT-0024]   Complete met3.
+[INFO DRT-0024]   Complete via3.
+[INFO DRT-0024]   Complete met4.
+[INFO DRT-0024]   Complete via4.
+[INFO DRT-0024]   Complete met5.
+[INFO DRT-0033] FR_MASTERSLICE shape region query size = 0.
+[INFO DRT-0033] FR_VIA shape region query size = 0.
+[INFO DRT-0033] li1 shape region query size = 21094.
+[INFO DRT-0033] mcon shape region query size = 202.
+[INFO DRT-0033] met1 shape region query size = 9077.
+[INFO DRT-0033] via shape region query size = 1860.
+[INFO DRT-0033] met2 shape region query size = 1224.
+[INFO DRT-0033] via2 shape region query size = 1488.
+[INFO DRT-0033] met3 shape region query size = 1203.
+[INFO DRT-0033] via3 shape region query size = 1488.
+[INFO DRT-0033] met4 shape region query size = 456.
+[INFO DRT-0033] via4 shape region query size = 72.
+[INFO DRT-0033] met5 shape region query size = 84.
+[INFO DRT-0165] Start pin access.
+[INFO DRT-0076]   Complete 100 pins.
+[INFO DRT-0076]   Complete 200 pins.
+[INFO DRT-0076]   Complete 300 pins.
+[INFO DRT-0076]   Complete 400 pins.
+[INFO DRT-0076]   Complete 500 pins.
+[INFO DRT-0078]   Complete 503 pins.
+[INFO DRT-0079]   Complete 100 unique inst patterns.
+[INFO DRT-0081]   Complete 131 unique inst patterns.
+[INFO DRT-0084]   Complete 460 groups.
+#scanned instances     = 3964
+#unique  instances     = 141
+#stdCellGenAp          = 4043
+#stdCellValidPlanarAp  = 22
+#stdCellValidViaAp     = 3140
+#stdCellPinNoAp        = 0
+#stdCellPinCnt         = 1560
+#instTermValidViaApCnt = 0
+#macroGenAp            = 0
+#macroValidPlanarAp    = 0
+#macroValidViaAp       = 0
+#macroNoAp             = 0
+[INFO DRT-0166] Complete pin access.
+[INFO DRT-0267] cpu time = 00:00:17, elapsed time = 00:00:04, memory = 159.81 (MB), peak = 191.91 (MB)
+
+Number of guides:     3849
+
+[INFO DRT-0169] Post process guides.
+[INFO DRT-0176] GCELLGRID X 0 DO 25 STEP 6900 ;
+[INFO DRT-0177] GCELLGRID Y 0 DO 25 STEP 6900 ;
+[INFO DRT-0028]   Complete FR_MASTERSLICE.
+[INFO DRT-0028]   Complete Fr_VIA.
+[INFO DRT-0028]   Complete li1.
+[INFO DRT-0028]   Complete mcon.
+[INFO DRT-0028]   Complete met1.
+[INFO DRT-0028]   Complete via.
+[INFO DRT-0028]   Complete met2.
+[INFO DRT-0028]   Complete via2.
+[INFO DRT-0028]   Complete met3.
+[INFO DRT-0028]   Complete via3.
+[INFO DRT-0028]   Complete met4.
+[INFO DRT-0028]   Complete via4.
+[INFO DRT-0028]   Complete met5.
+[INFO DRT-0178] Init guide query.
+[INFO DRT-0035]   Complete FR_MASTERSLICE (guide).
+[INFO DRT-0035]   Complete Fr_VIA (guide).
+[INFO DRT-0035]   Complete li1 (guide).
+[INFO DRT-0035]   Complete mcon (guide).
+[INFO DRT-0035]   Complete met1 (guide).
+[INFO DRT-0035]   Complete via (guide).
+[INFO DRT-0035]   Complete met2 (guide).
+[INFO DRT-0035]   Complete via2 (guide).
+[INFO DRT-0035]   Complete met3 (guide).
+[INFO DRT-0035]   Complete via3 (guide).
+[INFO DRT-0035]   Complete met4 (guide).
+[INFO DRT-0035]   Complete via4 (guide).
+[INFO DRT-0035]   Complete met5 (guide).
+[INFO DRT-0036] FR_MASTERSLICE guide region query size = 0.
+[INFO DRT-0036] FR_VIA guide region query size = 0.
+[INFO DRT-0036] li1 guide region query size = 1214.
+[INFO DRT-0036] mcon guide region query size = 0.
+[INFO DRT-0036] met1 guide region query size = 1009.
+[INFO DRT-0036] via guide region query size = 0.
+[INFO DRT-0036] met2 guide region query size = 586.
+[INFO DRT-0036] via2 guide region query size = 0.
+[INFO DRT-0036] met3 guide region query size = 89.
+[INFO DRT-0036] via3 guide region query size = 0.
+[INFO DRT-0036] met4 guide region query size = 1.
+[INFO DRT-0036] via4 guide region query size = 0.
+[INFO DRT-0036] met5 guide region query size = 0.
+[INFO DRT-0179] Init gr pin query.
+[INFO DRT-0185] Post process initialize RPin region query.
+[INFO DRT-0181] Start track assignment.
+[INFO DRT-0184] Done with 1801 vertical wires in 1 frboxes and 1098 horizontal wires in 1 frboxes.
+[INFO DRT-0186] Done with 247 vertical wires in 1 frboxes and 231 horizontal wires in 1 frboxes.
+[INFO DRT-0182] Complete track assignment.
+[INFO DRT-0267] cpu time = 00:00:00, elapsed time = 00:00:00, memory = 178.66 (MB), peak = 191.91 (MB)
+[INFO DRT-0187] Start routing data preparation.
+[INFO DRT-0267] cpu time = 00:00:00, elapsed time = 00:00:00, memory = 178.66 (MB), peak = 191.91 (MB)
+[INFO DRT-0194] Start detail routing.
+[INFO DRT-0195] Start 0th optimization iteration.
+    Completing 10% with 0 violations.
+    elapsed time = 00:00:00, memory = 196.82 (MB).
+    Completing 20% with 0 violations.
+    elapsed time = 00:00:00, memory = 202.75 (MB).
+    Completing 30% with 16 violations.
+    elapsed time = 00:00:00, memory = 210.27 (MB).
+    Completing 40% with 16 violations.
+    elapsed time = 00:00:00, memory = 210.53 (MB).
+    Completing 50% with 16 violations.
+    elapsed time = 00:00:01, memory = 214.91 (MB).
+    Completing 60% with 34 violations.
+    elapsed time = 00:00:01, memory = 224.20 (MB).
+    Completing 70% with 34 violations.
+    elapsed time = 00:00:01, memory = 227.29 (MB).
+    Completing 80% with 52 violations.
+    elapsed time = 00:00:01, memory = 235.28 (MB).
+    Completing 90% with 52 violations.
+    elapsed time = 00:00:01, memory = 235.28 (MB).
+    Completing 100% with 61 violations.
+    elapsed time = 00:00:02, memory = 235.28 (MB).
+[INFO DRT-0199]   Number of violations = 69.
+Viol/Layer         li1   met1   met2
+Metal Spacing        5     28      2
+Min Hole             0      1      0
+Recheck              0      5      3
+Short                0     24      1
+[INFO DRT-0267] cpu time = 00:00:04, elapsed time = 00:00:02, memory = 575.39 (MB), peak = 575.39 (MB)
+Total wire length = 16306 um.
+Total wire length on LAYER li1 = 0 um.
+Total wire length on LAYER met1 = 6478 um.
+Total wire length on LAYER met2 = 8083 um.
+Total wire length on LAYER met3 = 1692 um.
+Total wire length on LAYER met4 = 51 um.
+Total wire length on LAYER met5 = 0 um.
+Total number of vias = 3187.
+Up-via summary (total 3187):.
+
+-----------------------
+ FR_MASTERSLICE       0
+            li1    1541
+           met1    1551
+           met2      93
+           met3       2
+           met4       0
+-----------------------
+                   3187
+
+
+[INFO DRT-0195] Start 1st optimization iteration.
+    Completing 10% with 69 violations.
+    elapsed time = 00:00:00, memory = 582.36 (MB).
+    Completing 20% with 69 violations.
+    elapsed time = 00:00:00, memory = 582.36 (MB).
+    Completing 30% with 50 violations.
+    elapsed time = 00:00:00, memory = 585.05 (MB).
+    Completing 40% with 50 violations.
+    elapsed time = 00:00:00, memory = 585.82 (MB).
+    Completing 50% with 50 violations.
+    elapsed time = 00:00:00, memory = 585.82 (MB).
+    Completing 60% with 33 violations.
+    elapsed time = 00:00:01, memory = 589.95 (MB).
+    Completing 70% with 33 violations.
+    elapsed time = 00:00:01, memory = 591.75 (MB).
+    Completing 80% with 18 violations.
+    elapsed time = 00:00:01, memory = 591.75 (MB).
+    Completing 90% with 18 violations.
+    elapsed time = 00:00:01, memory = 591.75 (MB).
+    Completing 100% with 17 violations.
+    elapsed time = 00:00:01, memory = 591.75 (MB).
+[INFO DRT-0199]   Number of violations = 17.
+Viol/Layer        met1   met2
+Metal Spacing       10      1
+Short                5      1
+[INFO DRT-0267] cpu time = 00:00:03, elapsed time = 00:00:02, memory = 591.75 (MB), peak = 591.75 (MB)
+Total wire length = 16243 um.
+Total wire length on LAYER li1 = 0 um.
+Total wire length on LAYER met1 = 6444 um.
+Total wire length on LAYER met2 = 8039 um.
+Total wire length on LAYER met3 = 1705 um.
+Total wire length on LAYER met4 = 54 um.
+Total wire length on LAYER met5 = 0 um.
+Total number of vias = 3152.
+Up-via summary (total 3152):.
+
+-----------------------
+ FR_MASTERSLICE       0
+            li1    1537
+           met1    1522
+           met2      91
+           met3       2
+           met4       0
+-----------------------
+                   3152
+
+
+[INFO DRT-0195] Start 2nd optimization iteration.
+    Completing 10% with 17 violations.
+    elapsed time = 00:00:00, memory = 591.75 (MB).
+    Completing 20% with 17 violations.
+    elapsed time = 00:00:00, memory = 591.75 (MB).
+    Completing 30% with 17 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 40% with 18 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 50% with 18 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 60% with 18 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 70% with 18 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 80% with 18 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 90% with 13 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 100% with 4 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+[INFO DRT-0199]   Number of violations = 5.
+Viol/Layer         li1   met1   met2
+Metal Spacing        0      0      1
+Recheck              1      0      0
+Short                0      1      2
+[INFO DRT-0267] cpu time = 00:00:01, elapsed time = 00:00:00, memory = 598.97 (MB), peak = 598.97 (MB)
+Total wire length = 16233 um.
+Total wire length on LAYER li1 = 0 um.
+Total wire length on LAYER met1 = 6348 um.
+Total wire length on LAYER met2 = 8044 um.
+Total wire length on LAYER met3 = 1786 um.
+Total wire length on LAYER met4 = 54 um.
+Total wire length on LAYER met5 = 0 um.
+Total number of vias = 3174.
+Up-via summary (total 3174):.
+
+-----------------------
+ FR_MASTERSLICE       0
+            li1    1539
+           met1    1542
+           met2      91
+           met3       2
+           met4       0
+-----------------------
+                   3174
+
+
+[INFO DRT-0195] Start 3rd optimization iteration.
+    Completing 10% with 5 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 20% with 5 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 30% with 5 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 40% with 5 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 50% with 5 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 60% with 4 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 70% with 4 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 80% with 2 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 90% with 2 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+    Completing 100% with 0 violations.
+    elapsed time = 00:00:00, memory = 598.97 (MB).
+[INFO DRT-0199]   Number of violations = 0.
+[INFO DRT-0267] cpu time = 00:00:00, elapsed time = 00:00:00, memory = 598.97 (MB), peak = 598.97 (MB)
+Total wire length = 16231 um.
+Total wire length on LAYER li1 = 0 um.
+Total wire length on LAYER met1 = 6345 um.
+Total wire length on LAYER met2 = 8029 um.
+Total wire length on LAYER met3 = 1789 um.
+Total wire length on LAYER met4 = 67 um.
+Total wire length on LAYER met5 = 0 um.
+Total number of vias = 3181.
+Up-via summary (total 3181):.
+
+-----------------------
+ FR_MASTERSLICE       0
+            li1    1539
+           met1    1547
+           met2      93
+           met3       2
+           met4       0
+-----------------------
+                   3181
+
+
+[INFO DRT-0198] Complete detail routing.
+Total wire length = 16231 um.
+Total wire length on LAYER li1 = 0 um.
+Total wire length on LAYER met1 = 6345 um.
+Total wire length on LAYER met2 = 8029 um.
+Total wire length on LAYER met3 = 1789 um.
+Total wire length on LAYER met4 = 67 um.
+Total wire length on LAYER met5 = 0 um.
+Total number of vias = 3181.
+Up-via summary (total 3181):.
+
+-----------------------
+ FR_MASTERSLICE       0
+            li1    1539
+           met1    1547
+           met2      93
+           met3       2
+           met4       0
+-----------------------
+                   3181
+
+
+[INFO DRT-0267] cpu time = 00:00:10, elapsed time = 00:00:06, memory = 598.97 (MB), peak = 598.97 (MB)
+
+[INFO DRT-0180] Post processing.
+#########################
+# Correct violations with the power grid
+#########################
+if {$openroad_drt_via_repair_post_route == "true"} {
+  repair_pdn_vias -all
+}
+# estimate for metrics
+estimate_parasitics -global_routing
+[WARNING GRT-0026] Missing route to pin _478_/B.
+[WARNING GRT-0026] Missing route to pin _478_/B.
+[WARNING GRT-0026] Missing route to pin _478_/B.
+[WARNING GRT-0026] Missing route to pin _440_/B.
+[WARNING GRT-0026] Missing route to pin _440_/B.
+[WARNING GRT-0026] Missing route to pin _440_/B.
+[WARNING GRT-0026] Missing route to pin _423_/B.
+[WARNING GRT-0026] Missing route to pin _423_/B.
+[WARNING GRT-0026] Missing route to pin _423_/B.
+[WARNING GRT-0026] Missing route to pin _612_/B.
+[WARNING GRT-0026] Missing route to pin _612_/B.
+[WARNING GRT-0026] Missing route to pin _612_/B.
+[WARNING GRT-0026] Missing route to pin _609_/B.
+[WARNING GRT-0026] Missing route to pin _609_/B.
+[WARNING GRT-0026] Missing route to pin _609_/B.
+[WARNING GRT-0026] Missing route to pin _413_/B.
+[WARNING GRT-0026] Missing route to pin _413_/B.
+[WARNING GRT-0026] Missing route to pin _413_/B.
+[WARNING GRT-0026] Missing route to pin _406_/B.
+[WARNING GRT-0026] Missing route to pin _406_/B.
+[WARNING GRT-0026] Missing route to pin _406_/B.
+[WARNING GRT-0026] Missing route to pin _405_/B.
+[WARNING GRT-0026] Missing route to pin _405_/B.
+[WARNING GRT-0026] Missing route to pin _405_/B.
+[WARNING GRT-0026] Missing route to pin _623_/B.
+[WARNING GRT-0026] Missing route to pin _403_/B.
+[WARNING GRT-0026] Missing route to pin _623_/B.
+[WARNING GRT-0026] Missing route to pin _403_/B.
+[WARNING GRT-0026] Missing route to pin _623_/B.
+[WARNING GRT-0026] Missing route to pin _403_/B.
+[WARNING GRT-0026] Missing route to pin _397_/B.
+[WARNING GRT-0026] Missing route to pin _397_/B.
+[WARNING GRT-0026] Missing route to pin _397_/B.
+[WARNING GRT-0026] Missing route to pin _528_/A.
+[WARNING GRT-0026] Missing route to pin _528_/A.
+[WARNING GRT-0026] Missing route to pin _528_/A.
+[WARNING GRT-0026] Missing route to pin _560_/A.
+[WARNING GRT-0026] Missing route to pin _560_/A.
+[WARNING GRT-0026] Missing route to pin _560_/A.
+[WARNING GRT-0026] Missing route to pin _571_/A.
+[WARNING GRT-0026] Missing route to pin _571_/A.
+[WARNING GRT-0026] Missing route to pin _571_/A.
+[WARNING GRT-0026] Missing route to pin _749_/A1.
+[WARNING GRT-0026] Missing route to pin _749_/A1.
+[WARNING GRT-0026] Missing route to pin _749_/A1.
+[WARNING GRT-0026] Missing route to pin _596_/A.
+[WARNING GRT-0026] Missing route to pin _596_/A.
+[WARNING GRT-0026] Missing route to pin _596_/A.
+[WARNING GRT-0026] Missing route to pin _440_/A.
+[WARNING GRT-0026] Missing route to pin _440_/A.
+[WARNING GRT-0026] Missing route to pin _440_/A.
+[WARNING GRT-0026] Missing route to pin _435_/A.
+[WARNING GRT-0026] Missing route to pin _435_/A.
+[WARNING GRT-0026] Missing route to pin _435_/A.
+[WARNING GRT-0026] Missing route to pin _423_/A.
+[WARNING GRT-0026] Missing route to pin _423_/A.
+[WARNING GRT-0026] Missing route to pin _423_/A.
+[WARNING GRT-0026] Missing route to pin _623_/A.
+[WARNING GRT-0026] Missing route to pin _623_/A.
+[WARNING GRT-0026] Missing route to pin _623_/A.
+[WARNING GRT-0026] Missing route to pin _397_/A.
+[WARNING GRT-0026] Missing route to pin _397_/A.
+[WARNING GRT-0026] Missing route to pin _397_/A.
+[WARNING GRT-0026] Missing route to pin _851_/X.
+[WARNING GRT-0026] Missing route to pin _851_/X.
+[WARNING GRT-0026] Missing route to pin _851_/X.
+[WARNING GRT-0026] Missing route to pin _676_/Y.
+[WARNING GRT-0026] Missing route to pin _676_/Y.
+[WARNING GRT-0026] Missing route to pin _676_/Y.
+[WARNING GRT-0026] Missing route to pin _694_/Y.
+[WARNING GRT-0026] Missing route to pin _694_/Y.
+[WARNING GRT-0026] Missing route to pin _694_/Y.
+[WARNING GRT-0026] Missing route to pin _651_/Y.
+[WARNING GRT-0026] Missing route to pin _651_/Y.
+[WARNING GRT-0026] Missing route to pin _651_/Y.
+[WARNING GRT-0026] Missing route to pin _695_/X.
+[WARNING GRT-0026] Missing route to pin _695_/X.
+[WARNING GRT-0026] Missing route to pin _695_/X.
+[WARNING GRT-0026] Missing route to pin _715_/Y.
+[WARNING GRT-0026] Missing route to pin _715_/Y.
+[WARNING GRT-0026] Missing route to pin _715_/Y.
+[WARNING GRT-0026] Missing route to pin _733_/Y.
+[WARNING GRT-0026] Missing route to pin _733_/Y.
+[WARNING GRT-0026] Missing route to pin _733_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/Y.
+[WARNING GRT-0026] Missing route to pin _815_/X.
+[WARNING GRT-0026] Missing route to pin _815_/X.
+[WARNING GRT-0026] Missing route to pin _815_/X.
+[WARNING GRT-0026] Missing route to pin _661_/Y.
+[WARNING GRT-0026] Missing route to pin _661_/Y.
+[WARNING GRT-0026] Missing route to pin _661_/Y.
+[WARNING GRT-0026] Missing route to pin _738_/Y.
+[WARNING GRT-0026] Missing route to pin _738_/Y.
+[WARNING GRT-0026] Missing route to pin _738_/Y.
+[WARNING GRT-0026] Missing route to pin _769_/Y.
+[WARNING GRT-0026] Missing route to pin _769_/Y.
+[WARNING GRT-0026] Missing route to pin _769_/Y.
+[WARNING GRT-0026] Missing route to pin _396_/Y.
+[WARNING GRT-0026] Missing route to pin _396_/Y.
+[WARNING GRT-0026] Missing route to pin _396_/Y.
+[WARNING GRT-0026] Missing route to pin _403_/Y.
+[WARNING GRT-0026] Missing route to pin _403_/Y.
+[WARNING GRT-0026] Missing route to pin _403_/Y.
+[WARNING GRT-0026] Missing route to pin _815_/A.
+[WARNING GRT-0026] Missing route to pin _815_/A.
+[WARNING GRT-0026] Missing route to pin _815_/A.
+[WARNING GRT-0026] Missing route to pin _788_/A1.
+[WARNING GRT-0026] Missing route to pin _788_/A1.
+[WARNING GRT-0026] Missing route to pin _788_/A1.
+[WARNING GRT-0026] Missing route to pin _441_/Y.
+[WARNING GRT-0026] Missing route to pin _441_/Y.
+[WARNING GRT-0026] Missing route to pin _441_/Y.
+[WARNING GRT-0026] Missing route to pin _445_/Y.
+[WARNING GRT-0026] Missing route to pin _445_/Y.
+[WARNING GRT-0026] Missing route to pin _445_/Y.
+[WARNING GRT-0026] Missing route to pin _726_/A.
+[WARNING GRT-0026] Missing route to pin _726_/A.
+[WARNING GRT-0026] Missing route to pin _726_/A.
+[WARNING GRT-0026] Missing route to pin _462_/Y.
+[WARNING GRT-0026] Missing route to pin _462_/Y.
+[WARNING GRT-0026] Missing route to pin _462_/Y.
+[WARNING GRT-0026] Missing route to pin _715_/B.
+[WARNING GRT-0026] Missing route to pin _715_/B.
+[WARNING GRT-0026] Missing route to pin _715_/B.
+[WARNING GRT-0026] Missing route to pin _474_/X.
+[WARNING GRT-0026] Missing route to pin _474_/X.
+[WARNING GRT-0026] Missing route to pin _474_/X.
+[WARNING GRT-0026] Missing route to pin _701_/A.
+[WARNING GRT-0026] Missing route to pin _701_/A.
+[WARNING GRT-0026] Missing route to pin _701_/A.
+[WARNING GRT-0026] Missing route to pin _522_/A1.
+[WARNING GRT-0026] Missing route to pin _522_/A1.
+[WARNING GRT-0026] Missing route to pin _522_/A1.
+[WARNING GRT-0026] Missing route to pin _666_/B.
+[WARNING GRT-0026] Missing route to pin _666_/B.
+[WARNING GRT-0026] Missing route to pin _666_/B.
+[WARNING GRT-0026] Missing route to pin _504_/X.
+[WARNING GRT-0026] Missing route to pin _504_/X.
+[WARNING GRT-0026] Missing route to pin _504_/X.
+[WARNING GRT-0026] Missing route to pin _508_/Y.
+[WARNING GRT-0026] Missing route to pin _508_/Y.
+[WARNING GRT-0026] Missing route to pin _508_/Y.
+[WARNING GRT-0026] Missing route to pin _510_/Y.
+[WARNING GRT-0026] Missing route to pin _510_/Y.
+[WARNING GRT-0026] Missing route to pin _510_/Y.
+[WARNING GRT-0026] Missing route to pin _521_/X.
+[WARNING GRT-0026] Missing route to pin _521_/X.
+[WARNING GRT-0026] Missing route to pin _521_/X.
+[WARNING GRT-0026] Missing route to pin _851_/A.
+[WARNING GRT-0026] Missing route to pin _851_/A.
+[WARNING GRT-0026] Missing route to pin _851_/A.
+[WARNING GRT-0026] Missing route to pin _553_/Y.
+[WARNING GRT-0026] Missing route to pin _553_/Y.
+[WARNING GRT-0026] Missing route to pin _553_/Y.
+[WARNING GRT-0026] Missing route to pin _557_/Y.
+[WARNING GRT-0026] Missing route to pin _557_/Y.
+[WARNING GRT-0026] Missing route to pin _557_/Y.
+[WARNING GRT-0026] Missing route to pin _558_/Y.
+[WARNING GRT-0026] Missing route to pin _558_/Y.
+[WARNING GRT-0026] Missing route to pin _558_/Y.
+[WARNING GRT-0026] Missing route to pin _696_/A.
+[WARNING GRT-0026] Missing route to pin _695_/A.
+[WARNING GRT-0026] Missing route to pin _696_/A.
+[WARNING GRT-0026] Missing route to pin _695_/A.
+[WARNING GRT-0026] Missing route to pin _696_/A.
+[WARNING GRT-0026] Missing route to pin _695_/A.
+[WARNING GRT-0026] Missing route to pin _562_/X.
+[WARNING GRT-0026] Missing route to pin _562_/X.
+[WARNING GRT-0026] Missing route to pin _562_/X.
+[WARNING GRT-0026] Missing route to pin _569_/Y.
+[WARNING GRT-0026] Missing route to pin _569_/Y.
+[WARNING GRT-0026] Missing route to pin _569_/Y.
+[WARNING GRT-0026] Missing route to pin _721_/A.
+[WARNING GRT-0026] Missing route to pin _573_/B.
+[WARNING GRT-0026] Missing route to pin _571_/X.
+[WARNING GRT-0026] Missing route to pin _721_/A.
+[WARNING GRT-0026] Missing route to pin _573_/B.
+[WARNING GRT-0026] Missing route to pin _571_/X.
+[WARNING GRT-0026] Missing route to pin _721_/A.
+[WARNING GRT-0026] Missing route to pin _573_/B.
+[WARNING GRT-0026] Missing route to pin _571_/X.
+[WARNING GRT-0026] Missing route to pin _577_/Y.
+[WARNING GRT-0026] Missing route to pin _577_/Y.
+[WARNING GRT-0026] Missing route to pin _577_/Y.
+[WARNING GRT-0026] Missing route to pin _585_/X.
+[WARNING GRT-0026] Missing route to pin _585_/X.
+[WARNING GRT-0026] Missing route to pin _585_/X.
+[WARNING GRT-0026] Missing route to pin _751_/B.
+[WARNING GRT-0026] Missing route to pin _751_/B.
+[WARNING GRT-0026] Missing route to pin _751_/B.
+[WARNING GRT-0026] Missing route to pin _757_/B.
+[WARNING GRT-0026] Missing route to pin _757_/B.
+[WARNING GRT-0026] Missing route to pin _757_/B.
+[WARNING GRT-0026] Missing route to pin _598_/Y.
+[WARNING GRT-0026] Missing route to pin _598_/Y.
+[WARNING GRT-0026] Missing route to pin _598_/Y.
+[WARNING GRT-0026] Missing route to pin _601_/Y.
+[WARNING GRT-0026] Missing route to pin _601_/Y.
+[WARNING GRT-0026] Missing route to pin _601_/Y.
+[WARNING GRT-0026] Missing route to pin _607_/Y.
+[WARNING GRT-0026] Missing route to pin _607_/Y.
+[WARNING GRT-0026] Missing route to pin _607_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/B.
+[WARNING GRT-0026] Missing route to pin _613_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/B.
+[WARNING GRT-0026] Missing route to pin _613_/Y.
+[WARNING GRT-0026] Missing route to pin _781_/B.
+[WARNING GRT-0026] Missing route to pin _613_/Y.
+[WARNING GRT-0026] Missing route to pin _614_/Y.
+[WARNING GRT-0026] Missing route to pin _614_/Y.
+[WARNING GRT-0026] Missing route to pin _614_/Y.
+[WARNING GRT-0026] Missing route to pin _623_/Y.
+[WARNING GRT-0026] Missing route to pin _623_/Y.
+[WARNING GRT-0026] Missing route to pin _623_/Y.
+[WARNING GRT-0026] Missing route to pin _628_/Y.
+[WARNING GRT-0026] Missing route to pin _628_/Y.
+[WARNING GRT-0026] Missing route to pin _628_/Y.
+[WARNING GRT-0026] Missing route to pin _844_/A2.
+[WARNING GRT-0026] Missing route to pin _844_/A2.
+[WARNING GRT-0026] Missing route to pin _844_/A2.
+[WARNING GRT-0026] Missing route to pin _647_/Y.
+[WARNING GRT-0026] Missing route to pin _647_/Y.
+[WARNING GRT-0026] Missing route to pin _647_/Y.
+[WARNING GRT-0026] Missing route to pin _652_/X.
+[WARNING GRT-0026] Missing route to pin _652_/X.
+[WARNING GRT-0026] Missing route to pin _652_/X.
+[WARNING GRT-0026] Missing route to pin _653_/Y.
+[WARNING GRT-0026] Missing route to pin _653_/Y.
+[WARNING GRT-0026] Missing route to pin _653_/Y.
+[WARNING GRT-0026] Missing route to pin _661_/B.
+[WARNING GRT-0026] Missing route to pin _661_/B.
+[WARNING GRT-0026] Missing route to pin _661_/B.
+[WARNING GRT-0026] Missing route to pin _669_/A1.
+[WARNING GRT-0026] Missing route to pin _663_/Y.
+[WARNING GRT-0026] Missing route to pin _669_/A1.
+[WARNING GRT-0026] Missing route to pin _663_/Y.
+[WARNING GRT-0026] Missing route to pin _669_/A1.
+[WARNING GRT-0026] Missing route to pin _663_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/C.
+[WARNING GRT-0026] Missing route to pin _665_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/C.
+[WARNING GRT-0026] Missing route to pin _665_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/C.
+[WARNING GRT-0026] Missing route to pin _665_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/Y.
+[WARNING GRT-0026] Missing route to pin _666_/Y.
+[WARNING GRT-0026] Missing route to pin _850_/B.
+[WARNING GRT-0026] Missing route to pin _850_/B.
+[WARNING GRT-0026] Missing route to pin _850_/B.
+[WARNING GRT-0026] Missing route to pin _671_/Y.
+[WARNING GRT-0026] Missing route to pin _671_/Y.
+[WARNING GRT-0026] Missing route to pin _671_/Y.
+[WARNING GRT-0026] Missing route to pin _675_/Y.
+[WARNING GRT-0026] Missing route to pin _675_/Y.
+[WARNING GRT-0026] Missing route to pin _675_/Y.
+[WARNING GRT-0026] Missing route to pin _689_/B.
+[WARNING GRT-0026] Missing route to pin _689_/B.
+[WARNING GRT-0026] Missing route to pin _689_/B.
+[WARNING GRT-0026] Missing route to pin _697_/Y.
+[WARNING GRT-0026] Missing route to pin _697_/Y.
+[WARNING GRT-0026] Missing route to pin _697_/Y.
+[WARNING GRT-0026] Missing route to pin _706_/B.
+[WARNING GRT-0026] Missing route to pin _706_/B.
+[WARNING GRT-0026] Missing route to pin _706_/B.
+[WARNING GRT-0026] Missing route to pin _715_/A.
+[WARNING GRT-0026] Missing route to pin _715_/A.
+[WARNING GRT-0026] Missing route to pin _715_/A.
+[WARNING GRT-0026] Missing route to pin _731_/Y.
+[WARNING GRT-0026] Missing route to pin _731_/Y.
+[WARNING GRT-0026] Missing route to pin _731_/Y.
+[WARNING GRT-0026] Missing route to pin _733_/B.
+[WARNING GRT-0026] Missing route to pin _733_/B.
+[WARNING GRT-0026] Missing route to pin _733_/B.
+[WARNING GRT-0026] Missing route to pin _743_/Y.
+[WARNING GRT-0026] Missing route to pin _743_/Y.
+[WARNING GRT-0026] Missing route to pin _743_/Y.
+[WARNING GRT-0026] Missing route to pin _758_/Y.
+[WARNING GRT-0026] Missing route to pin _758_/Y.
+[WARNING GRT-0026] Missing route to pin _758_/Y.
+[WARNING GRT-0026] Missing route to pin _759_/Y.
+[WARNING GRT-0026] Missing route to pin _759_/Y.
+[WARNING GRT-0026] Missing route to pin _759_/Y.
+[WARNING GRT-0026] Missing route to pin _761_/B.
+[WARNING GRT-0026] Missing route to pin _761_/B.
+[WARNING GRT-0026] Missing route to pin _761_/B.
+[WARNING GRT-0026] Missing route to pin _774_/B.
+[WARNING GRT-0026] Missing route to pin _774_/B.
+[WARNING GRT-0026] Missing route to pin _774_/B.
+[WARNING GRT-0026] Missing route to pin _776_/B.
+[WARNING GRT-0026] Missing route to pin _776_/B.
+[WARNING GRT-0026] Missing route to pin _776_/B.
+[WARNING GRT-0026] Missing route to pin _777_/Y.
+[WARNING GRT-0026] Missing route to pin _777_/Y.
+[WARNING GRT-0026] Missing route to pin _777_/Y.
+[WARNING GRT-0026] Missing route to pin _779_/Y.
+[WARNING GRT-0026] Missing route to pin _779_/Y.
+[WARNING GRT-0026] Missing route to pin _779_/Y.
+[WARNING GRT-0026] Missing route to pin _787_/Y.
+[WARNING GRT-0026] Missing route to pin _787_/Y.
+[WARNING GRT-0026] Missing route to pin _787_/Y.
+[WARNING GRT-0026] Missing route to pin _789_/Y.
+[WARNING GRT-0026] Missing route to pin _789_/Y.
+[WARNING GRT-0026] Missing route to pin _789_/Y.
+[WARNING GRT-0026] Missing route to pin _794_/B.
+[WARNING GRT-0026] Missing route to pin _794_/B.
+[WARNING GRT-0026] Missing route to pin _794_/B.
+[WARNING GRT-0026] Missing route to pin _824_/B1.
+[WARNING GRT-0026] Missing route to pin _824_/B1.
+[WARNING GRT-0026] Missing route to pin _824_/B1.
+[WARNING GRT-0026] Missing route to pin _828_/Y.
+[WARNING GRT-0026] Missing route to pin _828_/Y.
+[WARNING GRT-0026] Missing route to pin _828_/Y.
+[WARNING GRT-0026] Missing route to pin _832_/Y.
+[WARNING GRT-0026] Missing route to pin _832_/Y.
+[WARNING GRT-0026] Missing route to pin _832_/Y.
+[WARNING GRT-0026] Missing route to pin _846_/A2.
+[WARNING GRT-0026] Missing route to pin _846_/A2.
+[WARNING GRT-0026] Missing route to pin _846_/A2.
+[WARNING GRT-0026] Missing route to pin _850_/A.
+[WARNING GRT-0026] Missing route to pin _850_/A.
+[WARNING GRT-0026] Missing route to pin _850_/A.
+SC_METRIC: report_checks -path_delay max
+No paths found.
+SC_METRIC: report_checks -path_delay min
+No paths found.
+SC_METRIC: unconstrained
+Startpoint: B[0] (input port)
+Endpoint: S[63] (output port)
+Path Group: (none)
+Path Type: max
+Corner: slow
+
+    Cap   Delay    Time   Description
+----------------------------------------------------------------
+           0.00    0.00 ^ input external delay
+   0.02    0.60    0.60 ^ B[0] (in)
+   0.01    0.53    1.13 v _500_/Y (sky130_fd_sc_hd__nor2_1)
+   0.04    1.36    2.49 ^ _502_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.81    3.30 v _505_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.01    1.10    4.40 ^ _508_/Y (sky130_fd_sc_hd__o311ai_4)
+   0.02    0.63    5.03 v _512_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.02    1.14    6.17 v _521_/X (sky130_fd_sc_hd__o21ba_2)
+   0.03    1.24    7.41 v _522_/X (sky130_fd_sc_hd__o221a_4)
+   0.04    1.46    8.87 ^ _527_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.04    0.81    9.69 v _543_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.03    1.16   10.84 ^ _559_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.73   11.57 v _565_/Y (sky130_fd_sc_hd__a311oi_2)
+   0.01    1.24   12.81 ^ _570_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.72   13.53 v _574_/Y (sky130_fd_sc_hd__o211ai_2)
+   0.00    0.70   14.23 ^ _731_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.46   14.70 v _739_/Y (sky130_fd_sc_hd__o21ai_1)
+   0.02    1.61   16.31 ^ _745_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.03    0.82   17.13 v _749_/Y (sky130_fd_sc_hd__o22ai_4)
+   0.04    1.59   18.72 ^ _755_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.85   19.57 v _760_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.03    1.33   20.90 ^ _765_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.63   21.53 v _773_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.16   22.69 ^ _779_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.03    0.61   23.29 v _785_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.37   24.67 ^ _793_/Y (sky130_fd_sc_hd__o31ai_4)
+   0.03    0.71   25.37 v _799_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.05    1.72   27.09 ^ _807_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.91   28.00 v _841_/Y (sky130_fd_sc_hd__a41oi_2)
+   0.04    1.33   29.33 ^ _846_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.02    1.43   30.77 ^ _847_/X (sky130_fd_sc_hd__xor2_4)
+           0.00   30.77 ^ S[63] (out)
+                  30.77   data arrival time
+----------------------------------------------------------------
+(Path is unconstrained)
+
+
+SC_METRIC: DRV violators
+SC_METRIC: floating nets
+SC_METRIC: tns
+tns 0.00
+SC_METRIC: setupslack
+worst slack INF
+SC_METRIC: holdslack
+worst slack INF
+SC_METRIC: power
+Power for corner: fast
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.99e-12   2.90e-12   4.37e-06   4.37e-06 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.99e-12   2.90e-12   4.37e-06   4.37e-06 100.0%
+                           0.0%       0.0%     100.0%
+Power for corner: slow
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          8.41e-13   1.38e-12   1.07e-09   1.07e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  8.41e-13   1.38e-12   1.07e-09   1.07e-09 100.0%
+                           0.1%       0.1%      99.8%
+Power for corner: typical
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.53e-12   2.43e-12   1.65e-09   1.65e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.53e-12   2.43e-12   1.65e-09   1.65e-09 100.0%
+                           0.1%       0.1%      99.8%
+SC_METRIC: cellarea
+Design area 5600 u^2 20% utilization.
+| WARNING | job0  | route      | 0  | [WARNING FLW-0001] No clocks defined.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _478_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _478_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _478_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _612_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _612_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _612_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _609_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _609_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _609_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _413_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _413_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _413_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _406_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _406_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _406_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _405_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _405_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _405_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _528_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _528_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _528_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _560_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _560_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _560_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _749_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _749_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _749_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _596_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _596_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _596_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _440_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _435_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _435_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _435_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _423_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _397_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _676_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _676_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _676_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _694_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _694_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _694_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _651_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _651_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _651_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _738_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _738_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _738_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _769_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _769_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _769_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _396_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _396_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _396_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _403_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _815_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _788_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _788_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _788_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _441_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _441_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _441_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _445_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _445_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _445_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _726_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _726_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _726_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _462_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _462_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _462_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _474_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _474_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _474_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _701_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _701_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _701_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _522_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _522_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _522_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _504_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _504_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _504_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _508_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _508_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _508_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _510_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _510_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _510_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _521_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _521_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _521_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _851_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _553_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _553_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _553_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _557_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _557_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _557_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _558_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _558_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _558_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _696_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _696_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _696_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _695_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _562_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _562_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _562_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _569_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _569_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _569_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _721_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _573_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _721_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _573_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _721_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _573_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _571_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _577_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _577_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _577_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _585_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _585_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _585_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _751_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _751_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _751_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _757_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _757_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _757_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _598_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _598_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _598_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _601_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _601_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _601_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _607_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _607_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _607_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _613_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _613_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _781_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _613_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _614_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _614_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _614_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _623_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _628_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _628_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _628_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _844_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _844_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _844_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _647_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _647_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _647_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _652_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _652_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _652_/X.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _653_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _653_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _653_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _661_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _669_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _663_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _669_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _663_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _669_/A1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _663_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/C.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _665_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/C.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _665_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/C.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _665_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _666_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _671_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _671_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _671_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _675_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _675_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _675_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _689_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _689_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _689_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _697_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _697_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _697_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _706_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _706_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _706_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _715_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _731_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _731_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _731_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _733_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _743_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _743_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _743_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _758_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _758_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _758_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _759_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _759_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _759_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _761_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _761_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _761_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _774_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _774_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _774_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _776_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _776_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _776_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _777_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _777_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _777_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _779_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _779_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _779_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _787_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _787_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _787_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _789_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _789_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _789_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _794_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _794_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _794_/B.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _824_/B1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _824_/B1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _824_/B1.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _828_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _828_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _828_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _832_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _832_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _832_/Y.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _846_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _846_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _846_/A2.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/A.
+| WARNING | job0  | route      | 0  | [WARNING GRT-0026] Missing route to pin _850_/A.
+| INFO    | job0  | route      | 0  | Finished task in 13.48s
+---------------------------------------------------------------------------------------------------------------------------------------
+SUMMARY:
+
+design : KoggeStoneAdder
+params : None
+jobdir : build/KoggeStoneAdder/job0
+foundry : skywater
+process : skywater130
+targetlibs : sky130hd 
+
+               units                                       route0 
+ errors                                                      0    
+ warnings                                                   325   
+ drvs                                                        0    
+ unconstrained                                               66   
+ cellarea       um^2                                      5600.370
+ totalarea      um^2                                     28010.600
+ utilization       %                                       19.994 
+ peakpower        mw                                       0.000  
+ leakagepower     mw                                       0.000  
+ holdpaths                                                   0    
+ setuppaths                                                  0    
+ holdslack        ns   999999999999999939709166371603178586112.000
+ holdwns          ns                                       0.000  
+ holdtns          ns                                       0.000  
+ setupslack       ns   999999999999999939709166371603178586112.000
+ setupwns         ns                                       0.000  
+ setuptns         ns                                       0.000  
+ macros                                                      0    
+ cells                                                      838   
+ registers                                                   0    
+ buffers                                                     9    
+ pins                                                       195   
+ nets                                                       591   
+ vias                                                       3181  
+ wirelength       um                                     16231.000
+ memory            B                                      596.797M
+ exetime                                                   12.810 
+ tasktime                                                  13.480 
+---------------------------------------------------------------------------------------------------------------------------------------
+| INFO    | Generated HTML report at build/KoggeStoneAdder/job0/report.html
+| WARNING | Unable to open results page in web browser:
+build/KoggeStoneAdder/job0/report.html

@@ -1,0 +1,56 @@
+********************************************
+*  SURELOG SystemVerilog  Compiler/Linter  *
+********************************************
+
+Copyright (c) 2017-2022 Alain Dargelas,
+http://www.apache.org/licenses/LICENSE-2.0
+
+VERSION: 1.40
+BUILT  : Mar 13 2023
+DATE   : 2023-04-01.11:31:27
+COMMAND: -nocache -parse -nouhdm /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v -top KoggeStoneAdder +libext+.sv+.v
+
+[INF:CM0023] Creating log file ./slpp_all/surelog.log.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:99:26: Implicit port type (wire) for "Cout",
+there are 2 more instances of this message.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:158:26: Implicit port type (wire) for "Cout",
+there are 2 more instances of this message.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:44:25: Implicit port type (wire) for "Cout",
+there are 2 more instances of this message.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:31:26: Implicit port type (wire) for "Gij",
+there are 1 more instances of this message.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:19:26: Implicit port type (wire) for "Gij".
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:221:29: Implicit port type (wire) for "Cout",
+there are 2 more instances of this message.
+
+[NTE:CP0309] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:6:12: Implicit port type (wire) for "G",
+there are 1 more instances of this message.
+
+[NTE:EL0503] /home/prashant/Zero-ASIC/Adders/KoggeStoneAdder.v:217:1: Top level module "work@KoggeStoneAdder".
+
+[NTE:EL0508] Nb Top level modules: 1.
+
+[NTE:EL0509] Max instance depth: 3.
+
+[NTE:EL0510] Nb instances: 78.
+
+[NTE:EL0511] Nb leaf instances: 77.
+
+[INF:UH0706] Creating UHDM Model...
+
+[  FATAL] : 0
+[ SYNTAX] : 0
+[  ERROR] : 0
+[WARNING] : 0
+[   NOTE] : 12
+
+********************************************
+*   End SURELOG SVerilog Compiler/Linter   *
+********************************************
+

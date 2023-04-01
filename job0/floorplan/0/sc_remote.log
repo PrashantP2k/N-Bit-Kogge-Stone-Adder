@@ -1,0 +1,586 @@
+sccompute_init
+find: 'build': No such file or directory
+
+ ____  _ _ _                    ____                      _ _
+/ ___|(_) (_) ___ ___  _ __    / ___|___  _ __ ___  _ __ (_) | ___ _ __
+\___ \| | | |/ __/ _ \| '_ \  | |   / _ \| '_ ` _ \| '_ \| | |/ _ \ '__|
+ ___) | | | | (_| (_) | | | | | |__| (_) | | | | | | |_) | | |  __/ |
+|____/|_|_|_|\___\___/|_| |_|  \____\___/|_| |_| |_| .__/|_|_|\___|_|
+                                                   |_|
+
+Authors: Andreas Olofsson, William Ransohoff, Noah Moroze, Zachary Yedidia, Massimiliano Giacometti, Kimia Talaei, Peter Gadfort, Aulihan Teng
+Version: 0.10.1 
+
+--------------------------------------------------------------------------------
+| INFO    | Command line argument entered: ['option', 'cfg'] Value: build/KoggeStoneAdder/job0/configs/floorplan0.json
+| INFO    | Command line argument entered: ['option', 'builddir'] Value: build
+| INFO    | Command line argument entered: ['arg', 'step'] Value: floorplan
+| INFO    | Command line argument entered: ['arg', 'index'] Value: 0
+| INFO    | Command line argument entered: ['design'] Value: KoggeStoneAdder
+| INFO    | job0  | --         | -  | Checking manifest before running.
+| INFO    | job0  | floorplan  | 0  | Tool 'openroad' found with version 'v2.0-7072' in directory '/usr/local/bin'
+| INFO    | job0  | floorplan  | 0  | Running in build/KoggeStoneAdder/job0/floorplan/0
+| INFO    | job0  | floorplan  | 0  | openroad -exit -metrics reports/metrics.json /home/ubuntu/siliconcompiler/siliconcompiler/tools/openroad/sc_apr.tcl
+OpenROAD v2.0-7072-g6de104daf 
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+Reading liberty file for fast: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ff_100C_1v95.lib.gz
+Reading liberty file for slow: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ss_n40C_1v40.lib.gz
+Reading liberty file for typical: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__tt_025C_1v80.lib.gz
+Reading techlef: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/apr/sky130_fd_sc_hd.tlef
+[INFO ODB-0222] Reading LEF file: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/apr/sky130_fd_sc_hd.tlef
+[INFO ODB-0223]     Created 11 technology layers
+[INFO ODB-0224]     Created 25 technology vias
+[INFO ODB-0226] Finished LEF file:  /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/pdk/v0_0_2/apr/sky130_fd_sc_hd.tlef
+Reading lef: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lef/sky130_fd_sc_hd_merged.lef
+[INFO ODB-0222] Reading LEF file: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lef/sky130_fd_sc_hd_merged.lef
+[INFO ODB-0225]     Created 437 library cells
+[INFO ODB-0226] Finished LEF file:  /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lef/sky130_fd_sc_hd_merged.lef
+Reading netlist verilog: inputs/KoggeStoneAdder.vg
+Reading SDC: /home/ubuntu/siliconcompiler/siliconcompiler/tools/openroad/sc_constraints.sdc
+[WARNING FLW-0001] Defaulting back to default SDC
+[INFO FLW-0001] Using sky130_fd_sc_hd__buf_1 as the SDC IO constraint cell
+[INFO FLW-0001] Setting output load constraint to 0.023pF.
+[INFO FLW-0001] Setting input driving pin constraint to sky130_fd_sc_hd__buf_1/X.
+[WARNING FLW-0001] No clocks defined.
+[INFO ORD-0030] Using 4 thread(s).
+########################################################
+# FLOORPLANNING
+########################################################
+# Function adapted from OpenROAD:
+# https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/ca3004b85e0d4fbee3470115e63b83c498cfed85/flow/scripts/macro_place.tcl#L26
+proc design_has_unplaced_macros {} {
+  foreach inst [[ord::get_db_block] getInsts] {
+    if {[$inst isBlock] && ![$inst isFixed]} {
+      return true
+    }
+  }
+  return false
+}
+proc design_has_unplaced_ios {} {
+  foreach inst [[ord::get_db_block] getInsts] {
+    if {[$inst isPad] && ![$inst isFixed]} {
+      return true
+    }
+  }
+  return false
+}
+###########################
+# Setup Global Connections
+###########################
+if { [dict exists $sc_cfg tool $sc_tool task $sc_task {file} global_connect] } {
+  foreach global_connect [dict get $sc_cfg tool $sc_tool task $sc_task {file} global_connect] {
+    puts "Sourcing global connect configuration: ${global_connect}"
+    source $global_connect
+  }
+}
+Sourcing global connect configuration: /usr/local/lib/python3.8/dist-packages/siliconcompiler-0.10.1-py3.8-linux-x86_64.egg/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/apr/openroad/global_connect.tcl
+###########################
+# Initialize floorplan
+###########################
+if {[dict exists $sc_cfg input asic floorplan]} {
+  set def [lindex [dict get $sc_cfg input asic floorplan] 0]
+  puts "Reading floorplan DEF: ${def}"
+  read_def -floorplan_initialize $def
+} else {
+  #NOTE: assuming a two tuple value as lower left, upper right
+  set sc_diearea   [dict get $sc_cfg constraint outline]
+  set sc_corearea  [dict get $sc_cfg constraint corearea]
+  if {$sc_diearea != "" && $sc_corearea != ""} {
+    # Use die and core sizes
+    set sc_diesize  "[lindex $sc_diearea 0] [lindex $sc_diearea 1]"
+    set sc_coresize "[lindex $sc_corearea 0] [lindex $sc_corearea 1]"
+    initialize_floorplan -die_area $sc_diesize \
+      -core_area $sc_coresize \
+      -site $sc_site
+  } else {
+    # Use density
+    initialize_floorplan -aspect_ratio [dict get $sc_cfg constraint aspectratio] \
+      -utilization [dict get $sc_cfg constraint density] \
+      -core_space [dict get $sc_cfg constraint coremargin] \
+      -site $sc_site
+  }
+}
+[WARNING IFP-0028] Core area lower left (4.600, 4.600) snapped to (4.600, 5.440).
+[INFO IFP-0001] Added 61 rows of 367 sites.
+###########################
+# Track Creation
+###########################
+# source tracks from file if found, else else use schema entries
+if {[dict exists $sc_cfg library $sc_mainlib option file openroad_tracks]} {
+  set tracks_file [lindex [dict get $sc_cfg library $sc_mainlib option file openroad_tracks] 0]
+  puts "Sourcing tracks configuration: ${tracks_file}"
+  source $tracks_file
+} else {
+  make_tracks
+}
+set do_automatic_pins 1
+if { [dict exists $sc_cfg tool $sc_tool task $sc_task file padring] && \
+     [llength [dict get $sc_cfg tool $sc_tool task $sc_task file padring]] > 0 } {
+  set do_automatic_pins 0
+  ###########################
+  # Generate pad ring
+  ###########################
+  set padring_file [lindex [dict get $sc_cfg tool $sc_tool task $sc_task {file} padring] 0]
+  puts "Sourcing padring configuration: ${padring_file}"
+  source $padring_file
+  if { [design_has_unplaced_ios] } {
+    foreach inst [[ord::get_db_block] getInsts] {
+      if {[$inst isPad] && ![$inst isFixed]} {
+        utl::warn FLW 1 "[$inst getName] has not been placed"
+      }
+    }
+    utl::error FLW 1 "Design contains unplaced IOs"
+  }
+}
+###########################
+# Pin placement
+###########################
+# Build pin ordering if specified
+set pin_order [dict create 1 [dict create] 2 [dict create] 3 [dict create] 4 [dict create]]
+set pin_placement [list ]
+if {[dict exists $sc_cfg constraint pin]} {
+  dict for {name params} [dict get $sc_cfg constraint pin] {
+    set order [dict get $params order]
+    set side  [dict get $params side]
+    set place [dict get $params placement]
+    if { [llength $place] != 0 } {
+      # Pin has placement information
+      if { [llength $order] != 0 } {
+        # Pin also has order information
+        utl::error FLW 1 "Pin $name has placement specified in constraints, but also order."
+      }
+      lappend pin_placement $name
+    } else {
+      # Pin doesn't have placement
+      if { [llength $side] == 0 || [llength $order] == 0 } {
+        # Pin information is incomplete
+        utl::error FLW 1 "Pin $name doesn't have enough information to perform placement."
+      }
+      dict lappend pin_order [lindex $side 0] [lindex $order 0] $name
+    }
+  }
+}
+foreach pin $pin_placement {
+  set params [dict get $sc_cfg constraint pin $pin]
+  set layer  [dict get $params layer]
+  set side   [dict get $params side]
+  set place  [dict get $params placement]
+  if { [llength $layer] != 0 } {
+    set layer [sc_get_layer_name [lindex $layer 0]]
+  } elseif { [llength $side] != 0 } {
+    # Layer not set, but side is, so use that to determine layer
+    set side [lindex $side 0]
+    switch -regexp $side {
+      "1|3" {
+        set layer [lindex $sc_hpinmetal 0]
+      }
+      "2|4" {
+        set layer [lindex $sc_vpinmetal 0]
+      }
+      default {
+        utl::error FLW 1 "Side number ($side) is not supported."
+      }
+    }
+  } else {
+    utl::error FLW 1 "$name needs to either specify side or layer parameter."
+  }
+  set x_loc [lindex $place 0]
+  set y_loc [lindex $place 1]
+  place_pin -pin_name $name \
+    -layer $layer \
+    -location "$x_loc $y_loc" \
+    -force_to_die_boundary
+}
+dict for {side pins} $pin_order {
+  if { [dict size $pins] == 0 } {
+    continue
+  }
+  set ordered_pins []
+  dict for {index pin} $pins {
+    lappend ordered_pins {*}$pin
+  }
+  set layer  [dict get $params layer]
+  if { [llength $layer] != 0 } {
+    set layer [sc_get_layer_name [lindex $layer 0]]
+  } elseif { [llength $side] != 0 } {
+    # Layer not set, but side is, so use that to determine layer
+    switch -regexp $side {
+      "1|3" {
+        set layer [lindex $sc_hpinmetal 0]
+      }
+      "2|4" {
+        set layer [lindex $sc_vpinmetal 0]
+      }
+      default {
+        utl::error FLW 1 "Side number ($side) is not supported."
+      }
+    }
+  } else {
+    utl::error FLW 1 "$name needs to either specify side or layer parameter."
+  }
+  set edge_length 0
+  switch -regexp $side {
+    "1|3" {
+      set edge_length [expr [lindex [ord::get_die_area] 3] - [lindex [ord::get_die_area] 1]]
+    }
+    "2|4" {
+      set edge_length [expr [lindex [ord::get_die_area] 2] - [lindex [ord::get_die_area] 0]]
+    }
+    default {
+      utl::error FLW 1 "Side number ($side) is not supported."
+    }
+  }
+  set spacing [expr $edge_length / ([llength $ordered_pins] + 1)]
+  for {set i 0} { $i < [llength $ordered_pins] } { incr i } {
+    set name [lindex $ordered_pins $i]
+    switch -regexp $side {
+      "1" {
+        set x_loc [lindex [ord::get_die_area] 1]
+        set y_loc [expr ($i + 1) * $spacing]
+      }
+      "2" {
+        set x_loc [expr ($i + 1) * $spacing]
+        set y_loc [lindex [ord::get_die_area] 3]
+      }
+      "3" {
+        set x_loc [lindex [ord::get_die_area] 2]
+        set y_loc [expr ($i + 1) * $spacing]
+      }
+      "4" {
+        set x_loc [expr ($i + 1) * $spacing]
+        set y_loc [lindex [ord::get_die_area] 1]
+      }
+      default {
+        utl::error FLW 1 "Side number ($side) is not supported."
+      }
+    }
+    place_pin -pin_name $name \
+      -layer $layer \
+      -location "$x_loc $y_loc" \
+      -force_to_die_boundary
+  }
+}
+###########################
+# Macro placement
+###########################
+# If manual macro placement is provided use that first
+if {[dict exists $sc_cfg constraint component]} {
+  dict for {name params} [dict get $sc_cfg constraint component] {
+    set location [dict get $params placement]
+    set rotation [dict get $params rotation]
+    set flip     [dict get $params flip]
+    if { [dict exists $params partname] } {
+      set cell   [dict get $params partname]
+    } else {
+      set cell ""
+    }
+    if { [dict exists $params halo] } {
+      utl::warn FLW 1 "Halo is not supported in OpenROAD"
+    }
+    set transform_r [odb::dbTransform]
+    $transform_r setOrient "R${rotation}"
+    set transform_f [odb::dbTransform]
+    if { $flip == "true" } {
+      $transform_f setOrient [odb::dbTransform "MY"]
+    }
+    set transform_final [odb::dbTransform]
+    odb::dbTransform_concat $transform_r $transform_f $transform_final
+    set inst [[ord::get_db_block] findInst $name]
+    if { $inst == "NULL" } {
+      utl::error FLW 1 "Could not find instance: $name"
+    }
+    set master [$inst getMaster]
+    set height [ord::dbu_to_microns [$master getHeight]]
+    set width [ord::dbu_to_microns [$master getWidth]]
+    # TODO: determine snapping method and apply
+    set x_loc [expr [lindex $location 0] - $width / 2]
+    set y_loc [expr [lindex $location 1] - $height / 2]
+    set place_args []
+    if { $cell != "" } {
+      lappend place_args "-cell" $cell
+    }
+    place_cell -inst_name $name \
+      -origin "$x_loc $y_loc" \
+      -orient [$transform_final getOrient] \
+      -status FIRM \
+      {*}$place_args
+  }
+}
+if { $do_automatic_pins } {
+  ###########################
+  # Automatic Pin Placement
+  ###########################
+  if {[dict exists $sc_cfg tool $sc_tool task $sc_task var pin_thickness_h]} {
+    set h_mult [lindex [dict get $sc_cfg tool $sc_tool task $sc_task var pin_thickness_h] 0]
+    set_pin_thick_multiplier -hor_multiplier $h_mult
+  }
+  if {[dict exists $sc_cfg tool $sc_tool task $sc_task var pin_thickness_v]} {
+    set v_mult [lindex [dict get $sc_cfg tool $sc_tool task $sc_task var pin_thickness_v] 0]
+    set_pin_thick_multiplier -ver_multiplier $v_mult
+  }
+  if {[dict exists $sc_cfg tool $sc_tool task $sc_task {file} ppl_constraints]} {
+    foreach pin_constraint [dict get $sc_cfg tool $sc_tool task $sc_task {file} ppl_constraints] {
+      puts "Sourcing pin constraints: ${pin_constraint}"
+      source $pin_constraint
+    }
+  }
+  place_pins -hor_layers $sc_hpinmetal \
+    -ver_layers $sc_vpinmetal \
+    -random
+}
+Found 0 macro blocks.
+Using 1u default distance from corners.
+Using 2 tracks default min distance between IO pins.
+[INFO PPL-0007] Random pin placement.
+# Need to check if we have any macros before performing macro placement,
+# since we get an error otherwise.
+if {[design_has_unplaced_macros]} {
+  ###########################
+  # TDMS Placement
+  ###########################
+  global_placement -density $openroad_gpl_place_density \
+    -pad_left $openroad_gpl_padding \
+    -pad_right $openroad_gpl_padding
+  ###########################
+  # Macro placement
+  ###########################
+  macro_placement -halo $openroad_mpl_macro_place_halo \
+    -channel $openroad_mpl_macro_place_channel
+  # Note: some platforms set a "macro blockage halo" at this point, but the
+  # technologies we support do not, so we don't include that step for now.
+}
+if { [design_has_unplaced_macros] } {
+  utl::error FLW 1 "Design contains unplaced macros."
+}
+###########################
+# Insert tie cells
+###########################
+foreach tie_type "high low" {
+  if {[has_tie_cell $tie_type]} {
+    insert_tiecells [get_tie_cell $tie_type]
+  }
+}
+[INFO IFP-0030] Inserted 0 tiecells using sky130_fd_sc_hd__conb_1/HI.
+[INFO IFP-0030] Inserted 0 tiecells using sky130_fd_sc_hd__conb_1/LO.
+global_connect
+###########################
+# Tap Cells
+###########################
+if { [dict exists $sc_cfg tool $sc_tool task $sc_task {file} ifp_tapcell] } {
+  set tapcell_file [lindex [dict get $sc_cfg tool $sc_tool task $sc_task {file} ifp_tapcell] 0]
+  puts "Sourcing tapcell file: ${tapcell_file}"
+  source $tapcell_file
+  global_connect
+}
+Sourcing tapcell file: /usr/local/lib/python3.8/dist-packages/siliconcompiler-0.10.1-py3.8-linux-x86_64.egg/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/apr/openroad/tapcell.tcl
+[INFO TAP-0005] Inserted 378 tapcells.
+###########################
+# Power Network
+###########################
+if {$openroad_pdn_enable == "true" && \
+    [dict exists $sc_cfg tool $sc_tool task $sc_task {file} pdn_config]} {
+  foreach pdnconfig [dict get $sc_cfg tool $sc_tool task $sc_task {file} pdn_config] {
+    puts "Sourcing PDNGEN configuration: ${pdnconfig}"
+    source $pdnconfig
+  }
+  pdngen -failed_via_report "reports/${sc_design}_pdngen_failed_vias.rpt"
+}
+Sourcing PDNGEN configuration: /usr/local/lib/python3.8/dist-packages/siliconcompiler-0.10.1-py3.8-linux-x86_64.egg/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/apr/openroad/pdngen.tcl
+[INFO PDN-0001] Inserting grid: grid
+###########################
+# Check Power Network
+###########################
+foreach net [[ord::get_db_block] getNets] {
+  set type [$net getSigType]
+  if {$type == "POWER" || $type == "GROUND"} {
+    set net_name [$net getName]
+    if { ![$net isSpecial] } {
+      utl::warn FLW 1 "$net_name is marked as a supply net, but is not marked as a special net"
+    }
+    if { $openroad_psm_enable == "true" } {
+      puts "Check supply net: $net_name"
+      check_power_grid -net $net_name
+    }
+  }
+}
+Check supply net: VDD
+[WARNING PSM-0016] Voltage pad location (VSRC) file not specified, defaulting pad location to checkerboard pattern on core area.
+[WARNING PSM-0017] X direction bump pitch is not specified, defaulting to 140um.
+[WARNING PSM-0018] Y direction bump pitch is not specified, defaulting to 140um.
+[WARNING PSM-0019] Voltage on net VDD is not explicitly set.
+[WARNING PSM-0022] Using voltage 1.950V for VDD network.
+[WARNING PSM-0065] VSRC location not specified, using default checkerboard pattern with one VDD every size bumps in x-direction and one in two bumps in the y-direction
+[INFO PSM-0076] Setting metal node density to be standard cell height times 5.
+[INFO PSM-0031] Number of PDN nodes on net VDD = 1832.
+[INFO PSM-0064] Number of voltage sources = 1.
+[INFO PSM-0040] All PDN stripes on net VDD are connected.
+Check supply net: VSS
+[WARNING PSM-0016] Voltage pad location (VSRC) file not specified, defaulting pad location to checkerboard pattern on core area.
+[WARNING PSM-0017] X direction bump pitch is not specified, defaulting to 140um.
+[WARNING PSM-0018] Y direction bump pitch is not specified, defaulting to 140um.
+[WARNING PSM-0019] Voltage on net VSS is not explicitly set.
+[WARNING PSM-0021] Using voltage 0.000V for ground network.
+[WARNING PSM-0065] VSRC location not specified, using default checkerboard pattern with one VDD every size bumps in x-direction and one in two bumps in the y-direction
+[INFO PSM-0076] Setting metal node density to be standard cell height times 5.
+[WARNING PSM-0030] VSRC location at (89.010um, 88.400um) and size 10.000um, is not located on an existing power stripe node. Moving to closest node at (99.590um, 100.640um).
+[INFO PSM-0031] Number of PDN nodes on net VSS = 1832.
+[INFO PSM-0064] Number of voltage sources = 1.
+[INFO PSM-0040] All PDN stripes on net VSS are connected.
+###########################
+# Remove buffers inserted by synthesis
+###########################
+remove_buffers
+[INFO RSZ-0026] Removed 0 buffers.
+SC_METRIC: report_checks -path_delay max
+No paths found.
+SC_METRIC: report_checks -path_delay min
+No paths found.
+SC_METRIC: unconstrained
+Startpoint: A[0] (input port)
+Endpoint: S[63] (output port)
+Path Group: (none)
+Path Type: max
+Corner: slow
+
+    Cap   Delay    Time   Description
+----------------------------------------------------------------
+           0.00    0.00 ^ input external delay
+   0.01    0.28    0.28 ^ A[0] (in)
+   0.01    0.29    0.57 v _500_/Y (sky130_fd_sc_hd__nor2_1)
+   0.01    0.56    1.14 ^ _502_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.00    0.37    1.50 v _505_/Y (sky130_fd_sc_hd__a211oi_1)
+   0.01    1.01    2.51 ^ _508_/Y (sky130_fd_sc_hd__o311ai_2)
+   0.01    0.57    3.08 v _512_/Y (sky130_fd_sc_hd__a31oi_2)
+   0.01    0.85    3.92 v _521_/X (sky130_fd_sc_hd__o21ba_1)
+   0.01    1.13    5.05 v _522_/X (sky130_fd_sc_hd__o221a_4)
+   0.01    0.81    5.86 ^ _527_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.45    6.32 v _543_/Y (sky130_fd_sc_hd__a21oi_2)
+   0.01    0.76    7.07 ^ _559_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.00    0.43    7.50 v _565_/Y (sky130_fd_sc_hd__a311oi_2)
+   0.00    0.61    8.12 ^ _570_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.00    0.38    8.50 v _574_/Y (sky130_fd_sc_hd__o211ai_1)
+   0.01    0.76    9.26 ^ _731_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.38    9.64 v _739_/Y (sky130_fd_sc_hd__o21ai_2)
+   0.01    0.88   10.51 ^ _745_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.01    0.52   11.03 v _749_/Y (sky130_fd_sc_hd__o22ai_2)
+   0.01    0.78   11.81 ^ _755_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.52   12.34 v _760_/Y (sky130_fd_sc_hd__a31oi_2)
+   0.01    0.92   13.26 ^ _765_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.41   13.67 v _773_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.01    0.87   14.53 ^ _779_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.40   14.94 v _785_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.01    0.88   15.81 ^ _793_/Y (sky130_fd_sc_hd__o31ai_4)
+   0.01    0.45   16.27 v _799_/Y (sky130_fd_sc_hd__a21oi_2)
+   0.01    0.83   17.09 ^ _807_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.00    0.53   17.62 v _841_/Y (sky130_fd_sc_hd__a41oi_1)
+   0.01    0.71   18.33 ^ _846_/Y (sky130_fd_sc_hd__o21ai_2)
+   0.02    1.87   20.20 ^ _847_/X (sky130_fd_sc_hd__xor2_1)
+           0.00   20.20 ^ S[63] (out)
+                  20.20   data arrival time
+----------------------------------------------------------------
+(Path is unconstrained)
+
+
+SC_METRIC: DRV violators
+SC_METRIC: floating nets
+SC_METRIC: tns
+tns 0.00
+SC_METRIC: setupslack
+worst slack INF
+SC_METRIC: holdslack
+worst slack INF
+SC_METRIC: power
+Power for corner: fast
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          8.35e-13   1.60e-12   2.47e-06   2.47e-06 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  8.35e-13   1.60e-12   2.47e-06   2.47e-06 100.0%
+                           0.0%       0.0%     100.0%
+Power for corner: slow
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          3.76e-13   7.67e-13   9.96e-11   1.01e-10 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  3.76e-13   7.67e-13   9.96e-11   1.01e-10 100.0%
+                           0.4%       0.8%      98.9%
+Power for corner: typical
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          6.92e-13   1.34e-12   1.05e-09   1.05e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  6.92e-13   1.34e-12   1.05e-09   1.05e-09 100.0%
+                           0.1%       0.1%      99.8%
+SC_METRIC: cellarea
+Design area 3329 u^2 12% utilization.
+| WARNING | job0  | floorplan  | 0  | [WARNING FLW-0001] Defaulting back to default SDC
+| WARNING | job0  | floorplan  | 0  | [WARNING FLW-0001] No clocks defined.
+| WARNING | job0  | floorplan  | 0  | [WARNING IFP-0028] Core area lower left (4.600, 4.600) snapped to (4.600, 5.440).
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0016] Voltage pad location (VSRC) file not specified, defaulting pad location to checkerboard pattern on core area.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0017] X direction bump pitch is not specified, defaulting to 140um.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0018] Y direction bump pitch is not specified, defaulting to 140um.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0019] Voltage on net VDD is not explicitly set.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0022] Using voltage 1.950V for VDD network.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0065] VSRC location not specified, using default checkerboard pattern with one VDD every size bumps in x-direction and one in two bumps in the y-direction
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0016] Voltage pad location (VSRC) file not specified, defaulting pad location to checkerboard pattern on core area.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0017] X direction bump pitch is not specified, defaulting to 140um.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0018] Y direction bump pitch is not specified, defaulting to 140um.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0019] Voltage on net VSS is not explicitly set.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0021] Using voltage 0.000V for ground network.
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0065] VSRC location not specified, using default checkerboard pattern with one VDD every size bumps in x-direction and one in two bumps in the y-direction
+| WARNING | job0  | floorplan  | 0  | [WARNING PSM-0030] VSRC location at (89.010um, 88.400um) and size 10.000um, is not located on an existing power stripe node. Moving to closest node at (99.590um, 100.640um).
+| INFO    | job0  | floorplan  | 0  | Finished task in 2.25s
+---------------------------------------------------------------------------------------------------------------------------------------
+SUMMARY:
+
+design : KoggeStoneAdder
+params : None
+jobdir : build/KoggeStoneAdder/job0
+foundry : skywater
+process : skywater130
+targetlibs : sky130hd 
+
+               units                                    floorplan0
+ errors                                                      0    
+ warnings                                                    16   
+ drvs                                                        0    
+ unconstrained                                               66   
+ cellarea       um^2                                      3329.440
+ totalarea      um^2                                     28010.600
+ utilization       %                                       11.886 
+ peakpower        mw                                       0.000  
+ leakagepower     mw                                       0.000  
+ holdpaths                                                   0    
+ setuppaths                                                  0    
+ holdslack        ns   999999999999999939709166371603178586112.000
+ holdwns          ns                                       0.000  
+ holdtns          ns                                       0.000  
+ setupslack       ns   999999999999999939709166371603178586112.000
+ setupwns         ns                                       0.000  
+ setuptns         ns                                       0.000  
+ macros                                                      0    
+ cells                                                      838   
+ registers                                                   0    
+ buffers                                                     9    
+ pins                                                       195   
+ nets                                                       591   
+ memory            B                                      136.074M
+ exetime                                                   01.629 
+ tasktime                                                  02.250 
+---------------------------------------------------------------------------------------------------------------------------------------
+| INFO    | Generated HTML report at build/KoggeStoneAdder/job0/report.html
+| WARNING | Unable to open results page in web browser:
+build/KoggeStoneAdder/job0/report.html

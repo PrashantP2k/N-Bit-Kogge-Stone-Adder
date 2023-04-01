@@ -1,0 +1,53 @@
+sccompute_init
+find: 'build': No such file or directory
+
+ ____  _ _ _                    ____                      _ _
+/ ___|(_) (_) ___ ___  _ __    / ___|___  _ __ ___  _ __ (_) | ___ _ __
+\___ \| | | |/ __/ _ \| '_ \  | |   / _ \| '_ ` _ \| '_ \| | |/ _ \ '__|
+ ___) | | | | (_| (_) | | | | | |__| (_) | | | | | | |_) | | |  __/ |
+|____/|_|_|_|\___\___/|_| |_|  \____\___/|_| |_| |_| .__/|_|_|\___|_|
+                                                   |_|
+
+Authors: Andreas Olofsson, William Ransohoff, Noah Moroze, Zachary Yedidia, Massimiliano Giacometti, Kimia Talaei, Peter Gadfort, Aulihan Teng
+Version: 0.10.1 
+
+--------------------------------------------------------------------------------
+| INFO    | Command line argument entered: ['option', 'cfg'] Value: build/KoggeStoneAdder/job0/configs/export0.json
+| INFO    | Command line argument entered: ['option', 'builddir'] Value: build
+| INFO    | Command line argument entered: ['arg', 'step'] Value: export
+| INFO    | Command line argument entered: ['arg', 'index'] Value: 0
+| INFO    | Command line argument entered: ['design'] Value: KoggeStoneAdder
+| INFO    | job0  | --         | -  | Checking manifest before running.
+| INFO    | job0  | export     | 0  | Tool 'klayout' found with version '0.28.3' in directory '/usr/bin'
+| INFO    | job0  | export     | 0  | Running in build/KoggeStoneAdder/job0/export/0
+| INFO    | job0  | export     | 0  | klayout -z -nc -rx -r /home/ubuntu/siliconcompiler/siliconcompiler/tools/klayout/klayout_export.py -rd SC_ROOT=/home/ubuntu/siliconcompiler/siliconcompiler
+[INFO] Clearing cells...
+[INFO] Merging GDS/OAS files...
+	/home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/gds/sky130_fd_sc_hd.gds
+[INFO] Copying toplevel cell 'KoggeStoneAdder'
+WARNING: no fill config file specified
+[INFO] Checking for missing GDS/OAS...
+[INFO] All LEF cells have matching GDS/OAS cells
+[INFO] Checking for orphan cell in the final layout...
+[INFO] Writing out GDS/OAS 'outputs/KoggeStoneAdder.gds'
+| WARNING | job0  | export     | 0  | WARNING: no fill config file specified
+| INFO    | job0  | export     | 0  | Finished task in 4.94s
+---------------------------------------------------------------------------------------------------------------------------------------
+SUMMARY:
+
+design : KoggeStoneAdder
+params : None
+jobdir : build/KoggeStoneAdder/job0
+foundry : skywater
+process : skywater130
+targetlibs : sky130hd 
+
+          units   export0 
+ errors              0    
+ warnings            1    
+ memory       B   552.527M
+ exetime           04.129 
+ tasktime          04.940 
+---------------------------------------------------------------------------------------------------------------------------------------
+| INFO    | Generated summary image at build/KoggeStoneAdder/job0/KoggeStoneAdder.png
+| INFO    | Generated HTML report at build/KoggeStoneAdder/job0/report.html

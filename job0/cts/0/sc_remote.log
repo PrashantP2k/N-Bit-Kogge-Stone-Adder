@@ -1,0 +1,206 @@
+sccompute_init
+find: 'build': No such file or directory
+
+ ____  _ _ _                    ____                      _ _
+/ ___|(_) (_) ___ ___  _ __    / ___|___  _ __ ___  _ __ (_) | ___ _ __
+\___ \| | | |/ __/ _ \| '_ \  | |   / _ \| '_ ` _ \| '_ \| | |/ _ \ '__|
+ ___) | | | | (_| (_) | | | | | |__| (_) | | | | | | |_) | | |  __/ |
+|____/|_|_|_|\___\___/|_| |_|  \____\___/|_| |_| |_| .__/|_|_|\___|_|
+                                                   |_|
+
+Authors: Andreas Olofsson, William Ransohoff, Noah Moroze, Zachary Yedidia, Massimiliano Giacometti, Kimia Talaei, Peter Gadfort, Aulihan Teng
+Version: 0.10.1 
+
+--------------------------------------------------------------------------------
+| INFO    | Command line argument entered: ['option', 'cfg'] Value: build/KoggeStoneAdder/job0/configs/cts0.json
+| INFO    | Command line argument entered: ['option', 'builddir'] Value: build
+| INFO    | Command line argument entered: ['arg', 'step'] Value: cts
+| INFO    | Command line argument entered: ['arg', 'index'] Value: 0
+| INFO    | Command line argument entered: ['design'] Value: KoggeStoneAdder
+| INFO    | job0  | --         | -  | Checking manifest before running.
+| INFO    | job0  | cts        | 0  | Tool 'openroad' found with version 'v2.0-7072' in directory '/usr/local/bin'
+| INFO    | job0  | cts        | 0  | Running in build/KoggeStoneAdder/job0/cts/0
+| INFO    | job0  | cts        | 0  | openroad -exit -metrics reports/metrics.json /home/ubuntu/siliconcompiler/siliconcompiler/tools/openroad/sc_apr.tcl
+OpenROAD v2.0-7072-g6de104daf 
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+Reading liberty file for fast: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ff_100C_1v95.lib.gz
+Reading liberty file for slow: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__ss_n40C_1v40.lib.gz
+Reading liberty file for typical: /home/ubuntu/siliconcompiler/third_party/pdks/skywater/skywater130/libs/sky130hd/v0_0_2/lib/sky130_fd_sc_hd__tt_025C_1v80.lib.gz
+Reading ODB: inputs/KoggeStoneAdder.odb
+Reading SDC: inputs/KoggeStoneAdder.sdc
+[WARNING FLW-0001] No clocks defined.
+[INFO ORD-0030] Using 4 thread(s).
+#######################################
+# Clock tree synthesis
+# (skip if no clocks defined)
+#######################################
+if {[llength [all_clocks]] > 0} {
+  # Clone clock tree inverters next to register loads
+  # so cts does not try to buffer the inverted clocks.
+  repair_clock_inverters
+  set sc_cts_arguments []
+  if {$openroad_cts_balance_levels == "true"} {
+    lappend sc_cts_arguments "-balance_levels"
+  }
+  clock_tree_synthesis -root_buf $sc_clkbuf -buf_list $sc_clkbuf \
+    -sink_clustering_enable \
+    -sink_clustering_size $openroad_cts_cluster_size \
+    -sink_clustering_max_diameter $openroad_cts_cluster_diameter \
+    -distance_between_buffers $openroad_cts_distance_between_buffers \
+    {*}$sc_cts_arguments
+  set_propagated_clock [all_clocks]
+  estimate_parasitics -placement
+  repair_clock_nets
+  set_placement_padding -global \
+    -left $openroad_dpl_padding \
+    -right $openroad_dpl_padding
+  detailed_placement -max_displacement $openroad_dpl_max_displacement
+  check_placement -verbose
+  estimate_parasitics -placement
+  repair_timing -setup -setup_margin $openroad_rsz_setup_slack_margin -hold_margin $openroad_rsz_hold_slack_margin
+  estimate_parasitics -placement
+  repair_timing -hold -setup_margin $openroad_rsz_setup_slack_margin -hold_margin $openroad_rsz_hold_slack_margin
+  detailed_placement -max_displacement $openroad_dpl_max_displacement
+  check_placement -verbose
+}
+global_connect
+# estimate for metrics
+estimate_parasitics -placement
+SC_METRIC: report_checks -path_delay max
+No paths found.
+SC_METRIC: report_checks -path_delay min
+No paths found.
+SC_METRIC: unconstrained
+Startpoint: B[0] (input port)
+Endpoint: S[63] (output port)
+Path Group: (none)
+Path Type: max
+Corner: slow
+
+    Cap   Delay    Time   Description
+----------------------------------------------------------------
+           0.00    0.00 ^ input external delay
+   0.01    0.46    0.46 ^ B[0] (in)
+   0.01    0.42    0.87 v _500_/Y (sky130_fd_sc_hd__nor2_1)
+   0.03    1.04    1.91 ^ _502_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.64    2.55 v _505_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.01    1.13    3.68 ^ _508_/Y (sky130_fd_sc_hd__o311ai_4)
+   0.02    0.63    4.31 v _512_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.02    1.14    5.44 v _521_/X (sky130_fd_sc_hd__o21ba_2)
+   0.03    1.22    6.66 v _522_/X (sky130_fd_sc_hd__o221a_4)
+   0.03    1.21    7.88 ^ _527_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.03    0.65    8.53 v _543_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.03    1.19    9.72 ^ _559_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.01    0.75   10.47 v _565_/Y (sky130_fd_sc_hd__a311oi_2)
+   0.01    0.92   11.38 ^ _570_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.51   11.89 v _574_/Y (sky130_fd_sc_hd__o211ai_2)
+   0.01    0.70   12.60 ^ _731_/Y (sky130_fd_sc_hd__a21oi_1)
+   0.01    0.41   13.01 v _739_/Y (sky130_fd_sc_hd__o21ai_1)
+   0.01    1.34   14.35 ^ _745_/Y (sky130_fd_sc_hd__a211oi_2)
+   0.02    0.70   15.05 v _749_/Y (sky130_fd_sc_hd__o22ai_4)
+   0.03    1.25   16.30 ^ _755_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.72   17.03 v _760_/Y (sky130_fd_sc_hd__a31oi_4)
+   0.02    1.21   18.24 ^ _765_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.60   18.85 v _773_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.19   20.03 ^ _779_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.02    0.59   20.63 v _785_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.02    1.42   22.05 ^ _793_/Y (sky130_fd_sc_hd__o31ai_4)
+   0.02    0.70   22.75 v _799_/Y (sky130_fd_sc_hd__a21oi_4)
+   0.03    1.44   24.19 ^ _807_/Y (sky130_fd_sc_hd__o221ai_4)
+   0.01    0.82   25.01 v _841_/Y (sky130_fd_sc_hd__a41oi_2)
+   0.03    1.16   26.17 ^ _846_/Y (sky130_fd_sc_hd__o21ai_4)
+   0.02    1.27   27.44 ^ _847_/X (sky130_fd_sc_hd__xor2_4)
+           0.00   27.44 ^ S[63] (out)
+                  27.44   data arrival time
+----------------------------------------------------------------
+(Path is unconstrained)
+
+
+SC_METRIC: DRV violators
+SC_METRIC: floating nets
+SC_METRIC: tns
+tns 0.00
+SC_METRIC: setupslack
+worst slack INF
+SC_METRIC: holdslack
+worst slack INF
+SC_METRIC: power
+Power for corner: fast
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.96e-12   2.52e-12   4.37e-06   4.37e-06 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.96e-12   2.52e-12   4.37e-06   4.37e-06 100.0%
+                           0.0%       0.0%     100.0%
+Power for corner: slow
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          8.43e-13   1.19e-12   1.07e-09   1.07e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  8.43e-13   1.19e-12   1.07e-09   1.07e-09 100.0%
+                           0.1%       0.1%      99.8%
+Power for corner: typical
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Combinational          1.54e-12   2.11e-12   1.65e-09   1.65e-09 100.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.54e-12   2.11e-12   1.65e-09   1.65e-09 100.0%
+                           0.1%       0.1%      99.8%
+SC_METRIC: cellarea
+Design area 5600 u^2 20% utilization.
+| WARNING | job0  | cts        | 0  | [WARNING FLW-0001] No clocks defined.
+| INFO    | job0  | cts        | 0  | Finished task in 2.17s
+---------------------------------------------------------------------------------------------------------------------------------------
+SUMMARY:
+
+design : KoggeStoneAdder
+params : None
+jobdir : build/KoggeStoneAdder/job0
+foundry : skywater
+process : skywater130
+targetlibs : sky130hd 
+
+               units                                        cts0  
+ errors                                                      0    
+ warnings                                                    1    
+ drvs                                                        0    
+ unconstrained                                               66   
+ cellarea       um^2                                      5600.370
+ totalarea      um^2                                     28010.600
+ utilization       %                                       19.994 
+ peakpower        mw                                       0.000  
+ leakagepower     mw                                       0.000  
+ holdpaths                                                   0    
+ setuppaths                                                  0    
+ holdslack        ns   999999999999999939709166371603178586112.000
+ holdwns          ns                                       0.000  
+ holdtns          ns                                       0.000  
+ setupslack       ns   999999999999999939709166371603178586112.000
+ setupwns         ns                                       0.000  
+ setuptns         ns                                       0.000  
+ macros                                                      0    
+ cells                                                      838   
+ registers                                                   0    
+ buffers                                                     9    
+ pins                                                       195   
+ nets                                                       591   
+ memory            B                                      131.223M
+ exetime                                                   01.520 
+ tasktime                                                  02.169 
+---------------------------------------------------------------------------------------------------------------------------------------
+| INFO    | Generated HTML report at build/KoggeStoneAdder/job0/report.html
+| WARNING | Unable to open results page in web browser:
+build/KoggeStoneAdder/job0/report.html
